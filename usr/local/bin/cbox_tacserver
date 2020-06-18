@@ -1,0 +1,142 @@
+#!/bin/bash
+
+#
+# Configured script to configure TACACS+ server information
+#
+REV=20190221
+
+source /usr/local/bin/configmgmt
+
+PORTEX_SYS="/home/ssuser/portex_sys.conf"
+
+
+prompt="Select function options: "
+options=("Show current TACACS+ configuration" \
+	"Configure TACACS+ server1" \
+	"Configure TACACS+ server2" \
+	"Enable/Disable TACACS+ function" \
+#	"Test TACACS+ server" \
+	)
+
+echo ""
+echo ""
+PS3="$prompt "
+select opt in "${options[@]}" "Quit"; do 
+
+case "$REPLY" in
+
+1) echo "Show current TACACS+ configuration: "
+	echo ""
+	declare -A PORTEX_CONF
+	CONFIG_READ $PORTEX_SYS TAC_
+	echo -e "Current TACACS+ function: ${PORTEX_CONF[TAC_ENABLE]}"
+	echo -e "Current TACACS+ server1 IP/Key pair: ${PORTEX_CONF[TAC_SERVER1_IP]}/${PORTEX_CONF[TAC_SERVER1_KEY]}"
+	echo -e "Current TACACS+ server2 IP/Key pair: ${PORTEX_CONF[TAC_SERVER2_IP]}/${PORTEX_CONF[TAC_SERVER2_KEY]}"
+	;;
+
+2) echo "Configure TACACS+ server1: "
+	echo ""
+	declare -A PORTEX_CONF
+	CONFIG_READ $PORTEX_SYS TAC_
+
+	echo -e "Current TACACS+ server1 IP address: ${PORTEX_CONF[TAC_SERVER1_IP]}"
+	echo -e "Current TACACS+ server1 tacacs key: ${PORTEX_CONF[TAC_SERVER1_KEY]}\n"
+	echo ""
+	read -p "Are you sure to change the TACACS+ information? (Y/N): " ANSWER
+	case $ANSWER in
+		Y) echo "Change TACACS+ server1 configuration: "
+			echo ""
+			read -p "New TACACS+ server1 IP address: " ANSWER_IP
+			read -p "New TACACS+ server1 tacacs key: " ANSWER_KEY
+			CONFIG_CHANGE -m "TAC_SERVER1_IP=$ANSWER_IP"
+			CONFIG_CHANGE -m "TAC_SERVER1_KEY=$ANSWER_KEY"
+			echo ""
+			;;
+		*) echo "TACACS+ server1 configuration unchanged."
+			echo ""
+			;;
+	esac
+	;;
+
+3) echo "Configure TACACS+ server2: "
+        echo ""
+        declare -A PORTEX_CONF
+        CONFIG_READ $PORTEX_SYS TAC_
+
+        echo -e "Current TACACS+ server2 IP address: ${PORTEX_CONF[TAC_SERVER2_IP]}"
+        echo -e "Current TACACS+ server2 tacacs key: ${PORTEX_CONF[TAC_SERVER2_KEY]}\n"
+        echo ""
+        read -p "Are you sure to change the TACACS+ information? (Y/N): " ANSWER
+        case $ANSWER in
+                Y) echo "Change TACACS+ server2 configuration: "
+                        echo ""
+                        read -p "New TACACS+ server2 IP address: " ANSWER_IP
+                        read -p "New TACACS+ server2 tacacs key: " ANSWER_KEY
+                        CONFIG_CHANGE -m "TAC_SERVER2_IP=$ANSWER_IP"
+                        CONFIG_CHANGE -m "TAC_SERVER2_KEY=$ANSWER_KEY"
+                        echo ""
+                        ;;
+                *) echo "TACACS+ server2 configuration unchanged."
+                        echo ""
+                        ;;
+        esac
+        ;;
+
+4) echo "Enable or Disable TACACS+ function: "
+	echo ""
+	declare -A PORTEX_CONF
+	CONFIG_READ $PORTEX_SYS TAC_
+
+	echo -e "Current TACACS+ function is ${PORTEX_CONF[TAC_ENABLE]}."
+	case ${PORTEX_CONF[TAC_ENABLE]} in
+		ON)
+			echo ""
+			read -p "Do you want to switch TACACS+ function to OFF? (Y/N): " ANSWER_ONOFF
+			case $ANSWER_ONOFF in
+				Y)
+					CONFIG_CHANGE -m "TAC_ENABLE=OFF"
+					echo "TACACS+ function switch to OFF."
+					;;
+				*)
+					echo "TACACS+ function no unchanged."
+					;;
+			esac
+			;;
+		OFF)
+			echo ""
+			read -p "Do you want to switch TACACS+ function to ON? (Y/N): " ANSWER_ONOFF
+			case $ANSWER_ONOFF in
+				Y)
+					CONFIG_CHANGE -m "TAC_ENABLE=ON"
+					echo "TACACS+ function switch to ON."
+					;;
+				*)
+					echo "TACACS+ function unchanged"
+					;;
+			esac
+			;;
+		*)
+			echo "Fetal error."
+			exit 1
+			;;
+	esac
+	;;
+
+#5) echo "Test TACACS+ configuration"
+#	echo ""
+#	TAC_CLIENT="/usr/local/bin/tacacs_client"
+#	read -p "TACACS+ username: " TACUSERNAME
+#	read -sp "TACACS+ password: " TACPASSWORD
+#	echo ""
+#	$TAC_CLIENT -u $TACUSERNAME -H $TACSERVER -k $TACKEY -v authenticate --password $TACPASSWORD 2>/dev/null
+#	echo ""
+#	;;
+
+$(( ${#options[@]}+1 )) ) echo "Goodbye!"; break;;
+
+*) echo "Invalid option. Try another one.";continue;;
+
+esac
+
+done
+

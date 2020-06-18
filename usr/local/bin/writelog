@@ -1,0 +1,33 @@
+#!/bin/bash
+
+function write_log_buffer(){
+	LOG_BUFFER="/dev/shm/log_buffer"
+	FACILITY=$1
+	LEVEL=$2
+	MESG_TAG=$3
+	MESG_CONTENT=$4
+
+	echo $FACILITY | egrep "auth|authpriv|cron|daemon|ftp|kern|lpr|mail|news|syslog|user|uucp|security|local[0-7]" >/dev/null 2>&1
+	if [[ $? -ne 0 ]];then
+        	echo "Allowed facility name: auth, authpriv, cron, daemon, ftp, kern, lpr, mail, news, syslog, user, uucp, security, local0~7"
+	        exit 2;
+#	else
+#	        echo "facility is valid"
+	fi
+
+	echo $LEVEL | egrep "emerg|panic|alert|crit|err|error|warning|warn|notice|info|debug" >/dev/null 2>&1
+	if [[ $? -ne 0 ]];then
+		echo "Allowed level name: emerg|panic, alert, crit, err|error, warning|warn, notice, info, debug"
+		exit 2;
+#	else
+#		echo "level is valid"
+	fi
+
+	KEY=`echo $((1 + RANDOM % 100000))`
+	DATE=`date '+%Y-%m-%d %H:%M:%S'`
+
+	echo $KEY $DATE $MESG_TAG $FACILITY $LEVEL $MESG_CONTENT
+
+	echo "$KEY#$DATE#$MESG_TAG#$FACILITY#$LEVEL#$MESG_CONTENT" >> $LOG_BUFFER
+}
+

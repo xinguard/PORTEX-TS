@@ -1,0 +1,36 @@
+#!/bin/bash
+
+date
+PTL=`curl -s http://register.xgds.net | egrep "apache2.conf" | head -1`
+  if [[ $PTL ]]; then
+    echo "MCS Cloud control-channel is available"
+    echo -e "red_off\c" | nc -q 1 -U /var/run/uds_led
+  else
+    echo "MCS Cloud control-channel is NOT available"
+    echo -e "red_on\c" | nc -q 1 -U /var/run/uds_led
+  fi
+LPTL=$PTL
+
+echo ""
+sleep 3
+
+while [ 1 ]
+do
+date
+PTL=`curl -s http://register.xgds.net | egrep "apache2.conf" | head -1`
+  if [[ "$PTL" == "$LPTL" ]]; then
+    echo "MCS Cloud control-channel status is not changed; status is $LPTL"
+  elif [[ $PTL ]]; then
+    echo "MCS Cloud control-channel is available"
+    echo -e "red_off\c" | nc -q 1 -U /var/run/uds_led
+    LPTL=$PTL
+  else
+    echo "MCS Cloud control-channel is NOT available"
+    echo -e "red_on\c" | nc -q 1 -U /var/run/uds_led
+    LPTL=$PTL
+  fi
+
+echo ""
+sleep 3
+done
+

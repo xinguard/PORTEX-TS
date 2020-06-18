@@ -1,0 +1,41 @@
+#!/bin/bash
+
+function PINGTEST(){
+        GATEWAY=`ip route | egrep default | awk '{print $3}'`
+#        GATEWAY='192.168.15.25'
+	if [ -z "$GATEWAY" ]
+	then
+		echo "Can not find gateway"
+		GW_FLAG=0
+	else
+		echo "Gateway finded"
+		GW_FLAG=1
+	fi
+
+        PINGRESULT=`ping -c 1 $GATEWAY | egrep "100% packet loss"`
+        if [ -z "$PINGRESULT" ]
+        then
+                echo "Gateway is available"
+		PING_FLAG=1
+	else
+		echo "Gateway is unavailable"
+		PING_FLAG=0
+        fi
+}
+
+while [ 1 ]
+do
+	PINGTEST
+	echo $PING_FLAG
+
+	if [ $PING_FLAG -eq 1 ] && [ $GW_FLAG -eq 1 ]
+	then
+		echo "RED LED OFF"
+		echo -e "red_off\c" | nc -q 1 -U /var/run/uds_led
+	else
+		echo "RED LED ON"
+		echo -e "red_on\c" | nc -q 1 -U /var/run/uds_led
+	fi
+
+sleep 15
+done

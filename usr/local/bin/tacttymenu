@@ -1,0 +1,110 @@
+#!/bin/bash
+#
+#Revision:2018110404
+#
+
+export PATH=/sbin:${PATH}
+
+PROG_NAME=tacttymenu
+
+INPUT=/dev/shm/${PROG_NAME}-input.$$
+OUTPUT=/dev/shm/${PROG_NAME}-output.$$
+
+NAME="TWM JNPR-RE0"
+
+# trap and delete temp files
+trap "rm $OUTPUT; rm $INPUT; exit" SIGHUP SIGINT SIGTERM
+
+#
+# TACACS+ Accounting
+#
+TAC_CLIENT=/usr/local/bin/tacacs_client
+function tac_accounting(){
+	        $TAC_CLIENT -u $TAC_USERID -H $TAC_SERVER -k $TAC_KEY account -f $1 -c service=portex-tacmenu cmd=$2 cmdarg="$3 $4 $5 $6 $7" &>/dev/null 2>&1
+	}
+tac_accounting start tacttymenu
+
+#
+# Purpose - display output using msgbox
+#  $1 -> set msgbox height
+#  $2 -> set msgbox width
+#  $3 -> set msgbox title
+#
+function display_output(){
+    local h=${1-16}        # box height default 10
+    local w=${2-48}        # box width default 41
+    local t=${3-Output}    # box title
+    dialog --backtitle "SS Menu Output" --title "${t}" --clear --msgbox "$(<$OUTPUT)" ${h} ${w}
+}
+#
+# Purpose - display a system info
+#
+function show_usbinfo(){
+    ls -l /dev/CON* > $OUTPUT
+    display_output 20 80 "USB Console Info"
+}
+#
+# Purpose - Read USB Console Description
+#
+function show_con_name(){
+    PORT=$1
+    CON_NAME=`cat ~.minirc.$PORT | egrep \# | awk '{for(i=2;i<=NF;i++){printf "%s ", $i}; printf "\n"}'`
+}
+CON0_NAME=`cat .minirc.CON0 2>/dev/null | egrep \# | awk -F# '{print $3}'` 
+CON1_NAME=`cat .minirc.CON1 2>/dev/null | egrep \# | awk -F# '{print $3}'`
+CON2_NAME=`cat .minirc.CON2 2>/dev/null | egrep \# | awk -F# '{print $3}'`
+CON3_NAME=`cat .minirc.CON3 2>/dev/null | egrep \# | awk -F# '{print $3}'`
+CON4_NAME=`cat .minirc.CON4 2>/dev/null | egrep \# | awk -F# '{print $3}'`
+CON5_NAME=`cat .minirc.CON5 2>/dev/null | egrep \# | awk -F# '{print $3}'`
+CON6_NAME=`cat .minirc.CON6 2>/dev/null | egrep \# | awk -F# '{print $3}'`
+CON7_NAME=`cat .minirc.CON7 2>/dev/null | egrep \# | awk -F# '{print $3}'`
+#
+# set infinite loop
+#
+while true
+do
+
+    ### display main menu ###
+    dialog --clear  --help-button --backtitle "MCSC SS USB CONSOLE HOSTNAME: $HOSTNAME" \
+    --timeout 300 \
+    --title "[ USB - CONSOLE ]" \
+    --menu "Choose a task or USB Console to manage" 20 80 16 \
+        "USB Console Info" "Display USB Console Info" \
+	    "CON0" "Manage Console 0 ($CON0_NAME)" \
+	    "CON1" "Manage Console 1 ($CON1_NAME)" \
+	    "CON2" "Manage Console 2 ($CON2_NAME)" \
+	    "CON3" "Manage Console 3 ($CON3_NAME)" \
+	    "CON4" "Manage Console 4 ($CON4_NAME)" \
+	    "CON5" "Manage Console 5 ($CON5_NAME)" \
+	    "CON6" "Manage Console 6 ($CON6_NAME)" \
+	    "CON7" "Manage Console 7 ($CON7_NAME)" \
+    	"Exit" "Exit to Main Menu" 2>"${INPUT}"
+
+    _status=$?
+    if [ ${_status} -eq 255 ]
+    then
+        # got dialog timeout
+        exit 0
+    fi
+
+    menuitem=$(<"${INPUT}")
+
+    # make decsion
+    case $menuitem in
+        "USB Console Info")
+		tac_accounting start tacttymenu show_usbinfo
+		show_usbinfo
+		tac_accounting stop tacttymenu show_usbinfo
+		;;
+        "Exit")
+		tac_accounting stop tacttymenu
+		exit 0
+		# if temp files found, delete em
+		[ -f $OUTPUT ] && rm $OUTPUT
+		[ -f $INPUT ] && rm $INPUT
+		;;
+            "CON"*) /usr/local/bin/tacttyexec ${menuitem};;
+    esac
+
+done
+

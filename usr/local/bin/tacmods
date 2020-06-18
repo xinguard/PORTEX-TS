@@ -1,0 +1,98 @@
+#!/bin/bash
+#
+#    File: tacmods
+#   Descr: show sub modules menu for TACACS+ user 
+#
+#Revision:20190305
+#
+
+export PATH=/sbin:${PATH}
+
+PROG_NAME=tacmods
+
+INPUT=/dev/shm/${PROG_NAME}-input.$$
+OUTPUT=/dev/shm/${PROG_NAME}-output.$$
+
+SUBMODS_DIR=${TEST_SUBMODS_DIR:-/opt/mcs/submods}/
+
+# trap and delete temp files
+trap "rm $OUTPUT; rm $INPUT; exit" SIGHUP SIGINT SIGTERM
+
+#
+# TACACS+ Accounting
+#
+TAC_CLIENT=/usr/local/bin/tacacs_client
+function tac_accounting(){
+        $TAC_CLIENT -u $TAC_USERID -H $TAC_SERVER -k $TAC_KEY account -f $1 -c service=portex-tacmenu cmd=$2 cmdarg="$3 $4 $5 $6 $7" &>/dev/null 2>&1
+}
+tac_accounting start $PROG_NAME
+
+#
+# Purpose - display output using msgbox
+#  $1 -> set msgbox height
+#  $2 -> set msgbox width
+#  $3 -> set msgbox title
+#
+function display_output(){
+    local h=${1-10}        # box height default 10
+    local w=${2-41}        # box width default 41
+    local t=${3-Output}    # box title
+    dialog --backtitle "SS Menu Output" --title "${t}" --clear --msgbox "$(<$OUTPUT)" ${h} ${w}
+}
+#
+# Purpose - display a system info
+#
+function show_xxx_info(){
+    echo "result: XXX" > $OUTPUT
+    display_output 20 80 "Current XXX Status"
+}
+#
+# set infinite loop
+#
+while true
+do
+    _mod_items=()
+    for submod in `ls ${SUBMODS_DIR}/`
+    do
+        _mod_descr=`cat ${SUBMODS_DIR}/${submod}/descr`
+        _mod_items+=("${submod}" "${_mod_descr}")
+    done
+
+    ### display a sub menu ###
+    dialog --clear  --help-button --backtitle "MCSC SS Sub Menu of Modules" \
+    --timeout 300 \
+    --title "[ Sub Menu of Modules ]" \
+    --menu "Choose a module to run" 20 50 12 \
+        "${_mod_items[@]}" \
+        Exit "Exit to Main Menu" 2>"${INPUT}"
+
+    _status=$?
+    if [ ${_status} -eq 255 ]
+    then
+        # got dialog timeout
+        exit 0
+    fi
+
+    menuitem=$(<"${INPUT}")
+
+    # make decsion
+    case $menuitem in
+        Exit) exit 0;;
+        *) echo ${menuitem};
+           _do=${SUBMODS_DIR}/${menuitem}/scripts/do.sh
+           if [ -f ${_do} ]
+           then
+               bash ${_do}
+           else
+               echo "No script for module ${menuitem} to run..." > $OUTPUT
+               display_output 20 80 "WARNNING"
+           fi
+    esac
+
+done
+tac_accounting stop $PROG_NAME
+
+# if temp files found, delete em
+[ -f $OUTPUT ] && rm $OUTPUT
+[ -f $INPUT ] && rm $INPUT
+

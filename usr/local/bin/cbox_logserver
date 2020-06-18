@@ -1,0 +1,148 @@
+#!/bin/bash
+
+#
+# Configured script to configure SYSLOG server information
+#
+REV=20190221
+
+source /usr/local/bin/configmgmt
+
+PORTEX_SYS="/home/ssuser/portex_sys.conf"
+
+
+prompt="Select function options: "
+options=("Show SYSLOG configuration" \
+	"Configure SYSLOG server1" \
+	"Configure SYSLOG server2" \
+	"Enable/Disable SYSLOG function" \
+	"Test SYSLOG server" \
+	)
+
+echo ""
+PS3="$prompt "
+select opt in "${options[@]}" "Quit"; do 
+
+case "$REPLY" in
+
+1) echo "Show SYSLOG configuration: "
+	echo ""
+	declare -A PORTEX_CONF
+	CONFIG_READ $PORTEX_SYS LOG_
+	echo -e "Current SYSLOG function: ${PORTEX_CONF[LOG_ENABLE]}"
+	echo -e "Current SYSLOG server1 IP address: ${PORTEX_CONF[LOG_SERVER1_IP]}" 
+	echo -e "Current SYSLOG server2 IP address: ${PORTEX_CONF[LOG_SERVER2_IP]}"
+	echo ""
+	;;
+
+2) echo "Configure SYSLOG server1: "
+	echo ""
+	declare -A PORTEX_CONF
+	CONFIG_READ $PORTEX_SYS LOG_
+
+	echo -e "Current SYSLOG server1 IP address: ${PORTEX_CONF[LOG_SERVER1_IP]}"
+	echo ""
+	read -p "Are you sure to change the SYSLOG information? (Y/N): " ANSWER
+	case $ANSWER in
+		Y) echo "Change SYSLOG server1 configuration: "
+			echo ""
+			read -p "New SYSLOG server1 IP address: " ANSWER_IP
+			CONFIG_CHANGE -m "LOG_SERVER1_IP=$ANSWER_IP"
+			echo ""
+			;;
+		*) echo "SYSLOG server1 configuration unchanged."
+			echo ""
+			;;
+	esac
+	;;
+
+3) echo "Configure SYSLOG server2: "
+        echo ""
+        declare -A PORTEX_CONF
+        CONFIG_READ $PORTEX_SYS LOG_
+
+        echo -e "Current SYSLOG server2 IP address: ${PORTEX_CONF[LOG_SERVER2_IP]}"
+        echo ""
+        read -p "Are you sure to change the SYSLOG information? (Y/N): " ANSWER
+        case $ANSWER in
+                Y) echo "Change SYSLOG server2 configuration: "
+                        echo ""
+                        read -p "New SYSLOG server2 IP address: " ANSWER_IP
+                        CONFIG_CHANGE -m "LOG_SERVER2_IP=$ANSWER_IP"
+                        echo ""
+                        ;;
+                *) echo "SYSLOG server2 configuration unchanged."
+                        echo ""
+                        ;;
+        esac
+        ;;
+
+4) echo "Enable or Disable SYSLOG function: "
+	echo ""
+	declare -A PORTEX_CONF
+	CONFIG_READ $PORTEX_SYS LOG_
+
+	echo -e "Current SYSLOG function is ${PORTEX_CONF[LOG_ENABLE]}."
+	case ${PORTEX_CONF[LOG_ENABLE]} in
+		ON)
+			echo ""
+			read -p "Do you want to switch SYSLOG function to OFF? (Y/N): " ANSWER_ONOFF
+			case $ANSWER_ONOFF in
+				Y)
+					CONFIG_CHANGE -m "LOG_ENABLE=OFF"
+					echo "SYSLOG function switch to OFF."
+					;;
+				*)
+					echo "SYSLOG function no unchanged."
+					;;
+			esac
+			;;
+		OFF)
+			echo ""
+			read -p "Do you want to switch SYSLOG function to ON? (Y/N): " ANSWER_ON_OFF
+			case $ANSWER_ONOFF in
+				Y)
+					CONFIG_CHANGE -m "LOG_ENABLE=ON"
+					echo "SYSLOG function switch to ON."
+					;;
+				*)
+					echo "SYSLOG function unchanged/"
+					;;
+			esac
+			;;
+		*)
+			echo "Fetal error."
+			exit 1
+			;;
+	esac
+	;;
+
+5) echo "Test SYSLOG server."
+	echo ""
+	declare -A PORTEX_CONF
+	CONFIG_READ $PORTEX_SYS LOG_
+	if [ -n $PORTEX_CONF[LOG_SERVER1_IP]} ]; then
+		ping -c 1 ${PORTEX_CONF[LOG_SERVER1_IP]} >/dev/null 2>&1
+		if [ $? -eq 0 ]; then
+			echo "Configured SYSLOG server ${PORTEX_CONF[LOG_SERVER1_IP]} is available."
+		else
+			echo "Configured SYSLOG server ${PORTEX_CONF[LOG_SERVER1_IP]} is unavailable."
+		fi
+	fi
+	if [ -n $PORTEX_CONF[LOG_SERVER2_IP]} ]; then
+                ping -c 1 ${PORTEX_CONF[LOG_SERVER2_IP]} >/dev/null 2>&1
+                if [ $? -eq 0 ]; then
+                        echo "Configured SYSLOG server ${PORTEX_CONF[LOG_SERVER2_IP]} is available."
+                else
+                        echo "Configured SYSLOG server ${PORTEX_CONF[LOG_SERVER2_IP]} is unavailable."
+                fi
+        fi
+	;;
+
+$(( ${#options[@]}+1 )) ) echo "Goodbye!"; break;;
+
+*) echo "Invalid option. Try another one.";continue;;
+
+esac
+
+done
+

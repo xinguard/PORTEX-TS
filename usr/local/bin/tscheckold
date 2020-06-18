@@ -1,0 +1,43 @@
+#!/bin/bash
+
+source /usr/local/bin/writelog
+TAC_CONF="/etc/portex/tac_server.conf"
+
+function TACTEST(){
+	TAC_SERVER1=`cat $TAC_CONF | egrep -v '#' | egrep SERVER1 | awk -F= '{print $2}'`
+	TAC_SERVER2=`cat $TAC_CONF | egrep -v '#' | egrep SERVER2 | awk -F= '{print $2}'`
+
+	/bin/nc -vz -w 3 $TAC_SERVER1 49 &>/dev/null 2>&1
+	if [ $? -eq 0 ]; then
+		echo "Connect TACACS+ Server1 Successfully"
+		TAC_SERVER_FLAG=1
+	else
+		echo "Connect TACACS+ Server1 Unsuccessfully"
+		/bin/nc -vz -w 3 $TAC_SERVER2 49 &>/dev/null 2>&1
+		if [ $? -eq 0 ]; then
+			echo "Connect TACACS+ Server2 Successfully"
+			TAC_SERVER_FLAG=1
+		else
+			echo "Connect TACACS+ Server2 Unsuccessfully"
+			TAC_SERVER_FLAG=0
+		fi
+	fi
+}
+
+while [ 1 ]
+do
+	TACTEST
+	echo "$TAC_SERVER_FLAG"
+	if [ $TAC_SERVER_FLAG -eq 1 ]
+	then
+		echo "BLUE LED ON"
+		echo -e "blue_on\c" | nc -q 1 -U /var/run/uds_led
+	else
+		echo "BLUE LED OFF"
+		echo -e "blue_off\c" | nc -q 1 -U /var/run/uds_led
+		write_log_buffer auth warning TACACS "Both TACACS+ servers unavailable."
+	fi
+
+	echo ""
+	sleep 60
+done
