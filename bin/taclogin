@@ -2,6 +2,7 @@
 #
 # TACAACS+ login program
 #
+# Last updated: 2020/6/19
 source /usr/local/bin/writelog
 source /usr/local/bin/passwdmgmt
 source /usr/local/bin/configmgmt
