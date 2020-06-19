@@ -1,0 +1,81 @@
+#!/bin/bash
+
+#
+# Configured script to set ssh connection source
+#
+REV=20190219
+
+source /usr/local/bin/writelog
+source /usr/local/bin/configmgmt
+PORTEX_SYS="/home/ssuser/portex_sys.conf"
+
+prompt="Select function options: "
+options=("Show ACL list" \
+	"Add connection source" \
+	"Delete connection source" \
+	"Reflash policy")
+
+echo ""
+echo ""
+PS3="$prompt "
+select opt in "${options[@]}" "Quit"; do 
+
+case "$REPLY" in
+
+1) echo "Show ACL list: "
+        echo ""
+	echo "Allowed source IP prefix:"
+	cat $PORTEX_SYS | egrep -v '#' | egrep "ACL_IN"
+        echo ""
+        ;;
+
+2) echo "Add connection source: "
+        echo ""
+	echo "Current allowed source IP prefix list:"
+	cat $PORTEX_SYS | egrep -v '#' | egrep "ACL_IN"
+	echo ""
+	declare ADD_PREFIX=""
+	while [ -z "$ADD_PREFIX" ]
+	do
+	read -p 'Enter IP/Prefix to add: ' ADD_PREFIX
+	done
+	CONFIG_CHANGE -a "ACL_IN=$ADD_PREFIX"
+	write_log_buffer user notice INBOUND_ACL "$ADD_PREFIX is added in inbound ACL" >/dev/null
+	echo "New allowed source IP prefix list:"
+	cat $PORTEX_SYS | egrep -v '#' | egrep "ACL_IN"
+        echo ""
+        ;;
+
+3) echo "Delete connection source: "
+	echo ""
+	echo "Current allowed source IP prefix list:"
+	cat $PORTEX_SYS | egrep -v '#' | egrep "ACL_IN"
+	echo ""
+	declare DEL_PREFIX=""
+	while [ -z "$DEL_PREFIX" ]
+	do
+	read -p 'Enter IP prefix to delete: ' DEL_PREFIX
+	done
+	CONFIG_CHANGE -d "ACL_IN=$DEL_PREFIX"
+	write_log_buffer user notice INBOUND_ACL "$DEL_PREFIX is deleted from inbound ACL" >/dev/null
+	echo "New allowed source IP prefix list:"
+	cat $PORTEX_SYS | egrep -v '#' | egrep "ACL_IN"
+	echo ""
+        ;;
+
+4) echo "Reflash policy: "
+        echo ""
+	/usr/local/bin/concontrol
+	write_log_buffer user notice INBOUND_ACL "Inbound ACL policy is freshed"
+	echo ""
+        ;;
+
+
+$(( ${#options[@]}+1 )) ) echo "Goodbye!"; break;;
+
+*) echo "Invalid option. Try another one.";continue;;
+
+esac
+
+done
+

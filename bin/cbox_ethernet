@@ -1,0 +1,92 @@
+#!/bin/bash
+
+#
+# Configured script to set Ethernet and WiFi configuration
+#
+REV=20190218
+
+DHCP_CONF=/etc/dhcpcd.conf
+
+prompt="Select function options: "
+options=("Show Network Status" \
+	"Show dhcpcd.conf" \
+	"Set DHCP" \
+	"Set Static IP" \
+	"Ping test" \
+	"Traceroute test"\
+	"Restart network")
+
+echo ""
+echo ""
+PS3="$prompt "
+select opt in "${options[@]}" "Quit"; do 
+
+case "$REPLY" in
+
+1) echo "Select display interface status and routing information: "
+	echo ""
+	/sbin/ifconfig -a
+	/sbin/route -n
+	echo ""
+	;;
+
+2) echo "Show dhcpcd.conf configutation: "
+	echo ""
+	/bin/cat $DHCP_CONF
+	echo ""
+	;;
+
+3) echo "Select configure DHCP"
+	sed -i 's/^interface eth0/#interface eth0/' $DHCP_CONF
+	sed -i 's/^static ip_address/#static ip_address/' $DHCP_CONF
+	sed -i 's/^static routers/#static routers/' $DHCP_CONF
+	sed -i 's/^static domain_name_servers/#static domain_name_servers/' $DHCP_CONF
+	;;
+
+4) echo "Select configure static IP"
+	echo ""
+	CONF_HEAD="Example static"
+	CONF_TAIL="It is possible"
+	read -p 'Static IP address: ' STATIC_IP
+	read -p 'Static IP prefix: ' STATIC_PREFIX
+	read -p 'Default gateway: ' STATIC_GATEWAY
+	read -p '1st domain name server: ' STATIC_DNS1
+	read -p '2nd domain name server(option): ' STATIC_DNS2
+	sed -i '/'"$CONF_HEAD"'/,/'"$CONF_TAIL"'/  s/^#interface eth0/interface eth0/' $DHCP_CONF
+	sed -i '/'"$CONF_HEAD"'/,/'"$CONF_TAIL"'/  s/^#static ip_address=.*$/static ip_address='"$STATIC_IP"'\/'"$STATIC_PREFIX"'/' $DHCP_CONF
+	sed -i '/'"$CONF_HEAD"'/,/'"$CONF_TAIL"'/  s/^static ip_address=.*$/static ip_address='"$STATIC_IP"'\/'"$STATIC_PREFIX"'/' $DHCP_CONF
+	sed -i '/'"$CONF_HEAD"'/,/'"$CONF_TAIL"'/  s/^#static routers=.*$/static routers='"$STATIC_GATEWAY"'/' $DHCP_CONF
+	sed -i '/'"$CONF_HEAD"'/,/'"$CONF_TAIL"'/  s/^static routers=.*$/static routers='"$STATIC_GATEWAY"'/' $DHCP_CONF
+	sed -i '/'"$CONF_HEAD"'/,/'"$CONF_TAIL"'/  s/^#static domain_name_servers=.*$/static domain_name_servers='"$STATIC_DNS1 $STATIC_DNS2"'/' $DHCP_CONF
+	sed -i '/'"$CONF_HEAD"'/,/'"$CONF_TAIL"'/  s/^static domain_name_servers=.*$/static domain_name_servers='"$STATIC_DNS1 $STATIC_DNS2"'/' $DHCP_CONF
+	;;
+
+5) echo "Select ping test"
+	echo ""
+	read -p 'Target host: ' TARGET_HOST
+	/bin/ping -c 5 $TARGET_HOST
+	echo ""
+	;;
+
+6) echo "Select traceroute test"
+	echo ""
+	read -p 'Target host: ' TARGET_HOST
+	/usr/bin/traceroute.db -n $TARGET_HOST
+	echo ""
+	;;
+
+7) echo "Restart network"
+	echo ""
+	systemctl daemon-reload
+	systemctl restart dhcpcd
+	echo ""
+	;;
+
+$(( ${#options[@]}+1 )) ) echo "Goodbye!"; break;;
+
+*) echo "Invalid option. Try another one.";continue;;
+
+esac
+
+done
+

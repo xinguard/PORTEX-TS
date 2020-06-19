@@ -1,0 +1,200 @@
+#!/bin/bash
+
+#
+# Configured script to set Ethernet and WiFi configuration
+#
+REV=20190221
+
+source /usr/local/bin/passwdmgmt
+source /usr/local/bin/configmgmt
+source /usr/local/bin/writelog
+PORTEX_SYS="/home/ssuser/portex_sys.conf"
+
+function acct_check(){
+        LOCALACCT=$1
+
+        awk -F: '{print $1}' $PORTEX_SYS | egrep -v '#' | egrep -w $LOCALACCT >/dev/null 2>&1
+        if [ $? -eq 0 ];then
+#		echo "User account is existed"
+                echo "1"
+        else
+#		echo "User account is NOT existed"
+		echo "2"
+	fi
+}
+
+while true
+do
+
+prompt="Select function options: "
+options=("List local accounts" \
+	"Add local account" \
+	"Delete local account" \
+	"Set local account password" \
+	)
+
+echo ""
+echo ""
+PS3="$prompt "
+select opt in "${options[@]}" "Quit"; do 
+
+case "$REPLY" in
+
+1) echo "List local accounts: "
+	echo ""
+	echo "Local accounts on this host: "
+	for ITEM in `cat $PORTEX_SYS | egrep -v '#' | egrep ':localuser:'`
+	do
+		ACCOUNT=`echo $ITEM | awk -F: '{print $1}'`
+		PRIVILEGE=`echo $ITEM | awk -F: '{print $3}'`
+		echo "Account:$ACCOUNT	Privilege:$PRIVILEGE"
+	done
+	echo ""
+	;;
+
+2) echo "Add local account: "
+	echo ""
+	declare ACCT_NAME=""
+	while [ ! $ACCT_NAME ]
+	do
+	read -p "New local account: " ACCT_NAME
+	done
+	ACCOUNT=$(acct_check $ACCT_NAME)
+	        case $ACCOUNT in
+	                1)
+	                        echo "User account is existed; try again."
+	                        break
+	                        ;;
+	                *)
+	                        ;;
+		esac
+
+	read -sp "Enter user password: " PWD_INPUT
+	echo ""
+	read -sp "Retype user password: " PWD_INPUT2
+	echo ""
+	NEWPASS_CHECK $PWD_INPUT $PWD_INPUT2
+	case $? in
+		0)
+			echo "Good job!"
+			;;
+		1)
+			NEWPASS_NOTIFY
+			break
+			;;
+		2)
+			echo "User password does not match, try again."
+			break
+			;;
+		*)
+			echo "Check result: " $PASSWORD
+			echo "Fetal error"
+			break
+			;;
+	esac
+
+	read -p "New account privilege (1=admin, 2=op): " ACCT_PRIV
+	case $ACCT_PRIV in 
+		1)
+			PWD_SALT=`head /dev/urandom | tr -dc A-Za-z0-9 | head -c 8`
+			OUTPUT_CRYPT=`mkpasswd --method=SHA-512 -S $PWD_SALT $PWD_INPUT`
+			CONFIG_CHANGE -a $ACCT_NAME:localuser:admin:$OUTPUT_CRYPT
+			;;
+		2)
+			PWD_SALT=`head /dev/urandom | tr -dc A-Za-z0-9 | head -c 8`
+			OUTPUT_CRYPT=`mkpasswd --method=SHA-512 -S $PWD_SALT $PWD_INPUT`
+			CONFIG_CHANGE -a $ACCT_NAME:localuser:op:$OUTPUT_CRYPT
+			;;
+		*)
+			echo "Fetal error."
+			;;
+	esac
+	echo ""
+	write_log_buffer user notice ACCOUNT "Local account $ACCT_NAME is created" >/dev/null 2>&1
+	echo "New local user $ACCT_NAME created."
+	echo ""
+	;;
+
+3) echo "Delete local account: "
+	echo ""
+	declare ACCT_NAME=""
+	while [ ! $ACCT_NAME ]
+	do
+	read -p "Enter account to delete: " ACCT_NAME
+	done
+	ACCOUNT=$(acct_check $ACCT_NAME)
+	case $ACCOUNT in
+		2)
+			echo "User account is not existed; try again"
+			break
+			;;
+		*)
+			read -p "Press YES to delete account $ACCT_NAME: " DEL_ANS
+			case $DEL_ANS in
+				YES)
+					CONFIG_CHANGE -d $ACCT_NAME:localuser:
+					;;
+				*)
+					echo "Account $ACCT_NAME is NOT deleted."
+					break
+					;;
+			esac
+			;;
+
+	esac
+	;;
+
+4) echo "Change local account password: "
+	echo ""
+	declare ACCT_NAME=""
+	while [ ! $ACCT_NAME ]
+	do
+	read -p "Enter account to change password: " ACCT_NAME
+	done
+	ACCOUNT=$(acct_check $ACCT_NAME)
+	case $ACCOUNT in
+		2)
+			echo "User account is not existed; try again."
+			break
+			;;
+		*)
+			;;
+	esac
+	read -sp "Enter new password: " PWD_INPUT
+	echo ""
+	read -sp "Retype new password: " PWD_INPUT2
+	echo ""
+	NEWPASS_CHECK $PWD_INPUT $PWD_INPUT2
+	case $? in
+		0)
+			echo "God job!"
+			ACCT_PRIV=`cat $PORTEX_SYS | egrep "^$ACCT_NAME" | awk -F: '{print $3}'`
+			PWD_SALT=`head /dev/urandom | tr -dc A-Za-z0-9 | head -c 8`
+			OUTPUT_CRYPT=`mkpasswd --method=SHA-512 -S $PWD_SALT $PWD_INPUT`
+#			echo "OUTPUT_CRYPT is " $OUTPUT_CRYPT
+			CONFIG_CHANGE -p $ACCT_NAME:localuser:$ACCT_PRIV:$OUTPUT_CRYPT
+			;;
+		1)
+			NEWPASS_NOTIFY
+			break
+			;;
+		2)
+			echo "User password does not match, try again."
+			;;
+		*)
+			echo "Fetal error."
+			break
+			;;
+	esac
+	echo ""
+	;;
+
+$(( ${#options[@]}+1 )) ) echo "Goodbye!"; exit;;
+
+*) echo "Invalid option. Try another one.";continue;;
+
+esac
+
+done
+
+done

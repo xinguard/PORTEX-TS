@@ -1,0 +1,14 @@
+#!/bin/bash
+
+source /usr/local/bin/writelog
+
+while [ ! -d /dev/shm ]
+do
+	sleep 3
+done
+
+if [ ! -f $LOG_BUFFER ]; then
+	touch $LOG_BUFFER
+fi
+
+write_log_buffer daemon crit BOOTING "System booting"

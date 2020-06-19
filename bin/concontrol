@@ -1,0 +1,23 @@
+#!/bin/bash
+
+IPTABLES="/sbin/iptables"
+PORTEX_SYS="/home/ssuser/portex_sys.conf"
+
+$IPTABLES -F
+
+for IP_ADDRESS in `/bin/cat $PORTEX_SYS | /bin/egrep -v '#' | egrep ACL_IN | awk -F= '{print $2}'`
+do
+#$IPTABLES -A INPUT -p tcp -s "$IP_ADDRESS" --dport 22 -m state --state NEW,ESTABLISHED -j ACCEPT
+$IPTABLES -A INPUT -p tcp -s "$IP_ADDRESS" --dport 22 -j ACCEPT
+done
+
+if [ -z "$IP_ADDRESS" ]; then
+	$IPTABLES -A INPUT -j ACCEPT
+else
+	$IPTABLES -A INPUT -p tcp --dport 22 -j DROP
+	$IPTABLES -A INPUT -j ACCEPT
+fi
+
+echo ""
+
+$IPTABLES -L -n

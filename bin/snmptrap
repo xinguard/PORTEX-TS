@@ -1,0 +1,31 @@
+#!/bin/bash
+
+SNMPTRAP="/usr/bin/snmptrap"
+TRAPCONF="/etc/portex/snmptrap.conf"
+
+case $1 in
+	start)
+#		echo "System start"
+		OID=`/bin/cat $TRAPCONF | egrep -v '#' | egrep OID_RESTART | awk -F= '{print $2}'`
+		;;
+	usb)
+#		echo "USB changed"
+		OID=`/bin/cat $TRAPCONF | egrep -v '#' | egrep OID_USBCHANGE | awk -F= '{print $2}'`
+		;;
+	*)
+		echo "Use snmptrap start|usb EVENT_INFORMATION"
+		exit 1
+esac
+
+for SERVER in `/bin/cat $TRAPCONF | egrep -v '#' | egrep SNMPSERVER`
+do
+#	echo $SERVER
+	SNMPSERVER=`echo $SERVER | awk -F= '{print $2}' | awk -F: '{print $1}'`
+	SNMPVER=`echo $SERVER | awk -F= '{print $2}' | awk -F: '{print $2}'`
+	SNMPCOMM=`echo $SERVER | awk -F= '{print $2}' | awk -F: '{print $3}'`
+#	echo "$SNMPSERVER	$SNMPVER	$SNMPCOMM"
+	$SNMPTRAP -v $SNMPVER -c $SNMPCOMM $SNMPSERVER "" $OID $OID s "HOST:$HOSTNAME|EVENT=$2." >/dev/null 2>&1
+	DATE=`date`
+	echo "$DATE Sending SNMP trap \"$2\" to $SERVER"
+done
+

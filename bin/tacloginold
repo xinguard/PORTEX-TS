@@ -1,0 +1,96 @@
+#!/bin/bash
+#
+# TACAACS+ login program
+#
+
+TAC_CLIENT="/usr/local/bin/tacacs_client"
+TAC_SERVER_INFO="/etc/tac_server.conf"
+TAC_SERVER1=`cat $TAC_SERVER_INFO | egrep -v '#' | egrep SERVER1 | awk -F= '{print $2}'`
+TAC_KEY1=`cat $TAC_SERVER_INFO | egrep KEY1 | awk -F= '{print $2}'`
+TAC_SERVER2=`cat $TAC_SERVER_INFO | egrep -v '#' | egrep SERVER2 | awk -F= '{print $2}'`
+TAC_KEY2=`cat $TAC_SERVER_INFO | egrep KEY2 | awk -F= '{print $2}'`
+echo ""
+
+export TAC_USERID
+read -p 'Login username: ' TAC_USERID
+read -sp 'Login password: ' TAC_USERPASS
+echo ""
+
+#
+# Check TACACS+ server status
+#
+declare -i TAC_SERVER_FLAG=0
+/bin/nc -vz -w 3 $TAC_SERVER1 49 &>/dev/null 2>&1
+if [ $? -eq 0 ]; then
+#	echo "Connect TACACS+ Server1 Successfully"
+	TAC_SERVER_FLAG=1
+	export TAC_SERVER=$TAC_SERVER1
+	export TAC_KEY=$TAC_KEY1
+else
+	echo "Connect TACACS+ Server1 unsuccessfully"
+	/bin/nc -vz -w 3 $TAC_SERVER2 49 &>/dev/null 2>&1
+	if [ $? -eq 0 ]; then
+		echo "Connect TACACS+ Server2 Successfully"
+		TAC_SERVER_FLAG=1
+		export TAC_SERVER=$TAC_SERVER2
+		export TAC_KEY=$TAC_KEY2
+	fi
+fi
+
+#
+# Check username/password from TACACS+ server 
+#
+if [ $TAC_SERVER_FLAG -eq 1 ]; then
+declare -a CHECK=`$TAC_CLIENT -u $TAC_USERID -H $TAC_SERVER -k $TAC_KEY -v authenticate --password $TAC_USERPASS 2>/dev/null` 
+declare -a RESULT=`echo $CHECK | awk '{print $2}'`
+echo ""
+
+	if [[ $RESULT == "PASS" ]]; then
+#	        echo "Login PASS"
+
+		declare -a AAA_GROUP=`$TAC_CLIENT -u $TAC_USERID -H $TAC_SERVER -k $TAC_KEY -v authorize -c service=portex-tacmenu cmd=tacmenu | egrep "av-pairs:" -A 3 | awk -F^ '{print $2}' | egrep tacmenu 2>/dev/null`
+
+		case $AAA_GROUP in
+			tacmenusu*)
+#				echo "Launch tacmenusu"
+				/usr/local/bin/tacmenusu
+				;;
+			tacmenuop*)
+#				echo "Launch tacmenuop"
+				/usr/local/bin/tacmenuop
+				;;
+			*)
+				echo "No matched authorization group"
+				exit 1
+				;;
+		esac
+		exit 0
+	else
+     		echo "Login FAILED; check your TACACS+ username/password"
+		exit 1
+	fi
+
+else
+	echo "Connect TACACS+ Server2 unsuccessfully"
+fi
+
+#
+# Check username/password from local account
+#
+echo "Please login by local username/password"
+echo ""
+
+declare LOCALID
+while [ -z "$LOCALID" ]
+do
+read -p "$HOSTNAME login: " LOCALID
+done
+
+#if [ $LOCALID == "ssuser" ]; then
+#	echo "Login FAILED; you cann't use $LOCALID as username"
+#	exit 1
+#else
+#	echo "Launch local login"
+	/usr/bin/sudo /bin/login $LOCALID
+#fi
+

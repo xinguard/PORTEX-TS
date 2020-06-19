@@ -1,0 +1,126 @@
+#!/bin/bash
+
+source /usr/local/bin/writelog
+source /usr/local/bin/configmgmt
+PORTEX_SYS="/home/ssuser/portex_sys.conf"
+
+trap "CONFIG_READ $PORTEX_SYS RCHK_" SIGHUP
+
+CONFIG_READ $PORTEX_SYS RCHK_
+
+if [ -z "$1" ];then
+        declare PERIOD=${PORTEX_CONF[RCHK_GATEWAY]}
+else
+		declare PERIOD=${PORTEX_CONF[RCHK_GATEWAY]}
+		[ `echo $1 | egrep '^[0-9]+$'` ] && PERIOD=$1	# Check if $1 is an interger
+fi
+
+function PING_TEST(){
+        GATEWAY=`ip route | egrep default | awk '{print $3}'`
+        ping -c 1 $GATEWAY >/dev/null 2>&1
+#        if [ $? -eq 0 ];then
+#                echo "Gateway is available"
+#		echo "RED LED OFF"
+#		echo -e "red_off\c" | nc -q 1 -U /var/run/uds_led
+#		PING_FLAG=1
+#	else
+#		echo "Gateway is unavailable"
+#		echo "RED LED ON"
+#		echo -e "red_on\c" | nc -q 1 -U /var/run/uds_led
+#		PING_FLAG=0
+#        fi
+	case $? in
+		0)
+			echo "Gateway is available."
+			echo "RED LED OFF"
+			echo -e "red_off\c" | nc -q 1 -U /var/run/uds_led
+			PING_FLAG=1
+			;;
+		1)
+			echo "Gateway is unavailable."
+			echo "RED LED ON"
+			echo -e "red_on\c" | nc -q 1 -U /var/run/uds_led
+			PING_FLAG=0
+			;;
+		*)
+			echo "No gateway is found."
+			echo "RED LED ON"
+			echo -e "red_on\c" | nc -q 1 -U /var/run/uds_led
+			PING_FLAG=0
+			;;
+	esac
+	echo ""
+
+}
+
+declare LAST_STATUS=""
+PING_TEST
+if [ $PING_FLAG -eq 1 ]
+then
+	echo "Initial status is OKOK"
+	LAST_STATUS="OKOK"
+else
+	echo "Initial status is FAILED"
+	LAST_STATUS="FAIL"
+fi
+
+echo ""
+
+declare PING_OKOK=0
+declare PING_FAIL=0
+
+while [ TRUE ]
+do
+echo "Last status is $LAST_STATUS"
+case $LAST_STATUS in
+	OKOK)
+		echo "New status is OKOK"
+		COUNT=1
+		while [ $COUNT -le 4 ]
+		do
+			sleep $PERIOD
+			PING_TEST
+			if [ $PING_FLAG -eq 1 ];then
+				PING_OKOK=0
+				PING_FAIL=0
+				break
+			else
+				PING_FAIL=$((PING_FAIL + 1))
+				COUNT=$((COUNT + 1))
+				echo "PING_FAIL count is $PING_FAIL"
+				if [ $PING_FAIL -eq 4 ];then
+					echo "Send loss log"
+					write_log_buffer cron crit NETWORK "Network connection loss!"
+					PING_FAIL=0
+					LAST_STATUS="FAIL"
+				fi
+			fi
+		done
+		;;
+	FAIL)
+		echo "New status is FAILED"
+		COUNT=1
+		while [ $COUNT -le 4 ]
+		do
+			sleep $PERIOD
+			PING_TEST
+			if [ $PING_FLAG -eq 0 ];then
+				PING_FAIL=0
+				PING_OKOK=0
+				break
+			else
+				PING_OKOK=$((PING_OKOK + 1))
+				COUNT=$((COUNT + 1))
+				echo "PING_OKOK count is $PING_OKOK"
+				if [ $PING_OKOK -eq 4 ];then
+					echo "Send restore log"
+					write_log_buffer cron notice NETWORK "Network connection restore."
+					PING_OKOK=0
+					LAST_STATUS="OKOK"
+				fi
+			fi
+		done
+		;;
+esac
+done
+
