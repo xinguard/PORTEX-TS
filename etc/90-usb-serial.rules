@@ -1,0 +1,28 @@
+#
+# Configuration to set USB/RS-232 device static mapping
+#
+# Configuration for 1:1 USB/RS-232 convertor
+KERNELS=="1-1.1.2:1.0", SUBSYSTEM=="tty", SYMLINK+="CON0"
+KERNELS=="1-1.1.3:1.0", SUBSYSTEM=="tty", SYMLINK+="CON2"
+KERNELS=="1-1.3:1.0", SUBSYSTEM=="tty", SYMLINK+="CON4"
+KERNELS=="1-1.2:1.0", SUBSYSTEM=="tty", SYMLINK+="CON6"
+
+# Configuration for 1:2 USB/RS-232 convertor
+#KERNELS=="1-1.1.2.2", SUBSYSTEM=="tty", ATTRS{product}=="USB-Serial Controller D", SYMLINK+="CON0"
+#KERNELS=="1-1.1.2.3", SUBSYSTEM=="tty", ATTRS{product}=="USB-Serial Controller D", SYMLINK+="CON1"
+#KERNELS=="1-1.1.3.2", SUBSYSTEM=="tty", ATTRS{product}=="USB-Serial Controller D", SYMLINK+="CON2"
+#KERNELS=="1-1.1.3.3", SUBSYSTEM=="tty", ATTRS{product}=="USB-Serial Controller D", SYMLINK+="CON3"
+#KERNELS=="1-1.3.2", SUBSYSTEM=="tty", ATTRS{product}=="USB-Serial Controller D", SYMLINK+="CON4"
+#KERNELS=="1-1.3.3", SUBSYSTEM=="tty", ATTRS{product}=="USB-Serial Controller D", SYMLINK+="CON5"
+#KERNELS=="1-1.2.2", SUBSYSTEM=="tty", ATTRS{product}=="USB-Serial Controller D", SYMLINK+="CON6"
+#KERNELS=="1-1.2.3", SUBSYSTEM=="tty", ATTRS{product}=="USB-Serial Controller D", SYMLINK+="CON7"
+
+KERNELS=="1-1.1.2.2", SUBSYSTEM=="tty", SYMLINK+="CON0"
+KERNELS=="1-1.1.2.3", SUBSYSTEM=="tty", SYMLINK+="CON1"
+KERNELS=="1-1.1.3.2", SUBSYSTEM=="tty", SYMLINK+="CON2"
+KERNELS=="1-1.1.3.3", SUBSYSTEM=="tty", SYMLINK+="CON3"
+KERNELS=="1-1.3.2", SUBSYSTEM=="tty", SYMLINK+="CON4"
+KERNELS=="1-1.3.3", SUBSYSTEM=="tty", SYMLINK+="CON5"
+KERNELS=="1-1.2.2", SUBSYSTEM=="tty", SYMLINK+="CON6"
+KERNELS=="1-1.2.3", SUBSYSTEM=="tty", SYMLINK+="CON7"
+
