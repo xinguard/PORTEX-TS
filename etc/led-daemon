@@ -1,0 +1,49 @@
+#! /bin/sh
+#
+# Reference:
+# http://blog.itist.tw/2017/03/diy-power-and-reset-button-for-raspberry-pi.html
+
+### BEGIN INIT INFO
+# Provides:          led-daemon
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+### END INIT INFO
+
+case "$1" in
+  start)
+    echo "Starting led-daemon"
+    /opt/mcs/cbox_panel_control/bin/led_listen.py >/dev/null &
+    ;;
+  stop)
+    echo "Stopping led-daemon"
+    PID=`ps ax | grep led_listen | grep -v grep | awk '{print $1}'`
+    if [ $PID ]; then
+      kill -HUP $PID
+    fi
+    ;;
+  restart)
+    echo "Restart led-daemon"
+    PID=`ps ax | grep led_listen | grep -v grep | awk '{print $1}'`
+    if [ $PID ]; then
+      kill -HUP $PID
+    fi
+    /opt/mcs/cbox_panel_control/bin/led_listen.py >/dev/null &
+    ;;
+  status)
+    PID=`ps ax | grep led_listen | grep -v grep | awk '{print $1}'`
+    if [ $PID ]; then
+      echo "led-daemon is on"
+    else
+      echo "led-daemon is off"
+    fi
+    ;;
+  *)
+    echo "Usage: led-daemon {start|stop|restart|status}"
+    exit 1
+    ;;
+esac
+
+exit 0 
+
