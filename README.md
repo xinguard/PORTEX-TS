@@ -3,10 +3,10 @@
 PORTEX-TS software package installation guide
 
 ### System package upgrade:
-$ sudo apt-get update
-$ sudo apt-get dist-upgrade
-$ sudo apt-get install python-pip
-$ sudo pip install --upgrade pip
+$ sudo apt-get update  
+$ sudo apt-get dist-upgrade  
+$ sudo apt-get install python-pip  
+$ sudo pip install --upgrade pip  
 
 ### Necessary package installation:
 $ sudo apt-get -y install minicom tmux whois
