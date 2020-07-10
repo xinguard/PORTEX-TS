@@ -11,7 +11,7 @@
 # Install programs to /usr/local/bin
 for file in `ls bin`
 do
-    cp $file /usr/local/bin
+    su -s /binbash pi -c "cp bin/$file /usr/local/bin"
 done
 
 # Install program to /etc
