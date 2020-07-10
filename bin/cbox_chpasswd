@@ -3,7 +3,6 @@
 #
 # Configured script to set Ethernet and WiFi configuration
 #
-REV=20190221
 
 source /usr/local/bin/passwdmgmt
 source /usr/local/bin/configmgmt
@@ -11,16 +10,14 @@ source /usr/local/bin/writelog
 PORTEX_SYS="/home/ssuser/portex_sys.conf"
 
 function acct_check(){
-        LOCALACCT=$1
+    LOCALACCT=$1
 
-        awk -F: '{print $1}' $PORTEX_SYS | egrep -v '#' | egrep -w $LOCALACCT >/dev/null 2>&1
+    awk -F: '{print $1}' $PORTEX_SYS | egrep -v '#' | egrep -w $LOCALACCT >/dev/null 2>&1
         if [ $? -eq 0 ];then
-#		echo "User account is existed"
-                echo "1"
+            echo "1"
         else
-#		echo "User account is NOT existed"
-		echo "2"
-	fi
+			echo "2"
+		fi
 }
 
 while true
@@ -90,7 +87,6 @@ case "$REPLY" in
 			PWD_SALT=`head /dev/urandom | tr -dc A-Za-z0-9 | head -c 8`
 			OUTPUT_CRYPT=`mkpasswd --method=SHA-512 -S $PWD_SALT $PWD_INPUT`
 			echo $LOCAL_ACCT_NAME:localuser:$LOCAL_ACCT_PRIVILEGE:$OUTPUT_CRYPT
-#			CONFIG_CHANGE -p $LOCAL_ACCT_NAME:localuser:$LOCAL_ACCT_PRIVILEGE:$OUTPUT_CRYPT
 			CONFIG_CHANGE -d $ACCT_NAME:localuser:
 			CONFIG_CHANGE -a $ACCT_NAME:localuser:$ACCT_PRIV:$OUTPUT_CRYPT
 			;;

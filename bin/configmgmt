@@ -1,5 +1,7 @@
 #!/bin/bash
-
+#
+# Routine for configuration manegement
+#
 
 function CONFIG_CHANGE(){
 	CONF_FILE="/home/ssuser/portex_sys.conf"
@@ -101,13 +103,3 @@ function CONFIG_READ(){
                 done
         fi
 }
-
-#read -p "Enter KEY-VALUE pair: " INPUT
-#read -p "Enter option: " OPTION
-
-#CONFIG_CHANGE -m TAC_ENABLE=ON
-
-#CONFIG_CHANGE -a ACL_IN=192.168.12.0/22
-
-#CONFIG_CHANGE -a 'testl1:localuser:admin:$6$mrIdKxM0$sIYXlqjKrDdytHhoy1kLH2p7xGe9s92xTKjMtbBa1UhVYZy5qPD4wyS8M.JGimByAmYO.6.j63rwIt/IT4oyU.'
-

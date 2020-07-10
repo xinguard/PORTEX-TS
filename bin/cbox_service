@@ -1,9 +1,7 @@
 #!/bin/bash
-
 #
 # Configured script to set Ethernet and WiFi configuration
 #
-REV=20190221
 
 prompt="Select function options: "
 options=("TACACS+ server management" \

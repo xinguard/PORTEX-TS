@@ -1,5 +1,7 @@
 #!/bin/bash
-
+#
+# Check gateway status
+#
 source /usr/local/bin/writelog
 source /usr/local/bin/configmgmt
 PORTEX_SYS="/home/ssuser/portex_sys.conf"
@@ -16,19 +18,7 @@ else
 fi
 
 function PING_TEST(){
-        GATEWAY=`ip route | egrep default | awk '{print $3}'`
-        ping -c 1 $GATEWAY >/dev/null 2>&1
-#        if [ $? -eq 0 ];then
-#                echo "Gateway is available"
-#		echo "RED LED OFF"
-#		echo -e "red_off\c" | nc -q 1 -U /var/run/uds_led
-#		PING_FLAG=1
-#	else
-#		echo "Gateway is unavailable"
-#		echo "RED LED ON"
-#		echo -e "red_on\c" | nc -q 1 -U /var/run/uds_led
-#		PING_FLAG=0
-#        fi
+    GATEWAY=`ip route | egrep default | awk '{print $3}'`
 	case $? in
 		0)
 			echo "Gateway is available."

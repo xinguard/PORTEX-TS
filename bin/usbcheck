@@ -1,5 +1,7 @@
 #!/bin/bash
-
+#
+#
+#
 source /usr/local/bin/writelog
 LSUSB="/usr/bin/lsusb"
 
@@ -16,11 +18,11 @@ if [[ -n $USBLOG ]]; then
 
 	if [[ -n "$COMRESULT" ]]; then
 		echo "USB configuration changed, generate log!"
-#		/usr/local/bin/snmptrap usb "USB configuration is changed" >>/var/log/snmptrap.log
 		write_log_buffer local0 notice USB "USB configuration changed"
 	else
 		echo "No USB configuration changed"
 	fi
+	
 	rm $USBLOG_OLD
 
 else

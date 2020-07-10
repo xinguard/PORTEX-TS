@@ -3,7 +3,6 @@
 #
 # Configured script to set ssh connection source
 #
-REV=20190219
 
 source /usr/local/bin/writelog
 source /usr/local/bin/configmgmt

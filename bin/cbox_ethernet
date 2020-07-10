@@ -3,7 +3,6 @@
 #
 # Configured script to set Ethernet and WiFi configuration
 #
-REV=20190218
 
 DHCP_CONF=/etc/dhcpcd.conf
 

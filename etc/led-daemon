@@ -14,7 +14,7 @@
 case "$1" in
   start)
     echo "Starting led-daemon"
-    /opt/mcs/cbox_panel_control/bin/led_listen.py >/dev/null &
+    /usr/local/bin/led_listen.py >/dev/null &
     ;;
   stop)
     echo "Stopping led-daemon"
@@ -29,7 +29,7 @@ case "$1" in
     if [ $PID ]; then
       kill -HUP $PID
     fi
-    /opt/mcs/cbox_panel_control/bin/led_listen.py >/dev/null &
+    /usr/local/bin/led_listen.py >/dev/null &
     ;;
   status)
     PID=`ps ax | grep led_listen | grep -v grep | awk '{print $1}'`

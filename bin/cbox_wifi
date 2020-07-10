@@ -1,9 +1,7 @@
 #!/bin/bash
-
 #
 # Configured script to set Ethernet and WiFi configuration
 #
-REV=20190219
 
 WPACLI=/sbin/wpa_cli
 WPACONF=/etc/wpa_supplicant/wpa_supplicant.conf

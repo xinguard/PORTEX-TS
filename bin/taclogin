@@ -2,7 +2,6 @@
 #
 # TACAACS+ login program
 #
-# Last updated: 2020/6/19
 source /usr/local/bin/writelog
 source /usr/local/bin/passwdmgmt
 source /usr/local/bin/configmgmt
@@ -20,110 +19,90 @@ declare -a ERROR_ACCT
 
 #
 # Check if TACACS+ login is enable
-#TAC_ENABLE=`cat $PORTEX_CONF | egrep -v '#'3 | egrep TAC_ENABLE | awk -F= '{print $2}'`
-#echo ${PORTEX_CONF[TAC_ENABLE]}
 if [ ${PORTEX_CONF[TAC_ENABLE]} == "ON" ]; then
-
-TAC_CLIENT="/usr/local/bin/tacacs_client"
-#TAC_SERVER_INFO="/home/ssuser/portex_sys.conf"
-#TAC_SERVER1=`cat $TAC_SERVER_INFO | egrep -v '#' | egrep SERVER1_IP | awk -F= '{print $2}'`
-#TAC_KEY1=`cat $TAC_SERVER_INFO | egrep -v '#' | egrep SERVER1_KEY | awk -F= '{print $2}'`
-#TAC_SERVER2=`cat $TAC_SERVER_INFO | egrep -v '#' | egrep SERVER2_IP | awk -F= '{print $2}'`
-#TAC_KEY2=`cat $TAC_SERVER_INFO | egrep -v '#' | egrep SERVER2_KEY | awk -F= '{print $2}'`
-echo ""
+	TAC_CLIENT="/usr/local/bin/tacacs_client"
+ 	echo ""
 
 #
 # Check TACACS+ server status
 #
-/bin/nc -vz -w 3 ${PORTEX_CONF[TAC_SERVER1_IP]} 49 &>/dev/null 2>&1
-if [ $? -eq 0 ]; then
-#	echo "Connect TACACS+ server1 successfully"
-	TAC_SERVER_FLAG="TAC_SERVER1"
-	export TAC_SERVER=${PORTEX_CONF[TAC_SERVER1_IP]}
-	export TAC_KEY=${PORTEX_CONF[TAC_SERVER1_KEY]}
-else
-	echo "Connect TACACS+ server1 unsuccessfully"
-	/bin/nc -vz -w 3 ${PORTEX_CONF[TAC_SERVER2_IP]} 49 &>/dev/null 2>&1
+	/bin/nc -vz -w 3 ${PORTEX_CONF[TAC_SERVER1_IP]} 49 &>/dev/null 2>&1
 	if [ $? -eq 0 ]; then
-		echo "Connect TACACS+ server2 successfully"
-		TAC_SERVER_FLAG="TAC_SERVER2"
-		export TAC_SERVER=${PORTEX_CONF[TAC_SERVER2_IP]}
-		export TAC_KEY=${PORTEX_CONF[TAC_SERVER2_KEY]}
+		TAC_SERVER_FLAG="TAC_SERVER1"
+		export TAC_SERVER=${PORTEX_CONF[TAC_SERVER1_IP]}
+		export TAC_KEY=${PORTEX_CONF[TAC_SERVER1_KEY]}
 	else
-		echo "Connect TACACS+ Server2 unsuccessfully"
+		echo "Connect TACACS+ server1 unsuccessfully"
+		/bin/nc -vz -w 3 ${PORTEX_CONF[TAC_SERVER2_IP]} 49 &>/dev/null 2>&1
+		if [ $? -eq 0 ]; then
+			echo "Connect TACACS+ server2 successfully"
+			TAC_SERVER_FLAG="TAC_SERVER2"
+			export TAC_SERVER=${PORTEX_CONF[TAC_SERVER2_IP]}
+			export TAC_KEY=${PORTEX_CONF[TAC_SERVER2_KEY]}
+		else
+			echo "Connect TACACS+ Server2 unsuccessfully"
+		fi
 	fi
-fi
 
 #
 # If one of TACACS+ server is available, then use TACACS+ AAA
 #
-TRY_COUNT=0
-while [ $TAC_SERVER_FLAG ]; do
-
-TAC_USERID=""
-TAC_USERPASS=""
-#echo ""
-#read -p "$HOSTNAME (TACACS+) login: " TAC_USERID
-while [ ! $TAC_USERID ]; do
-	read -p "$HOSTNAME (TACACS+) login: " TAC_USERID
-done
-#read -sp "$HOSTNAME login password: " TAC_USERPASS
-while [ ! $TAC_USERPASS ]; do
-	read -sp "$HOSTNAME login password: " TAC_USERPASS
-	echo ""
-done
+	TRY_COUNT=0
+	while [ $TAC_SERVER_FLAG ]; do
+		TAC_USERID=""
+		TAC_USERPASS=""
+		while [ ! $TAC_USERID ]; do
+			read -p "$HOSTNAME (TACACS+) login: " TAC_USERID
+		done
+		while [ ! $TAC_USERPASS ]; do
+			read -sp "$HOSTNAME login password: " TAC_USERPASS
+			echo ""
+		done
 
 #
 # Check username/password from TACACS+ server 
 #
-declare -a CHECK=`$TAC_CLIENT -u $TAC_USERID -H $TAC_SERVER -k $TAC_KEY -v authenticate --password $TAC_USERPASS 2>/dev/null` 
-declare -a RESULT=`echo $CHECK | awk '{print $2}'`
-echo ""
+		declare -a CHECK=`$TAC_CLIENT -u $TAC_USERID -H $TAC_SERVER -k $TAC_KEY -v authenticate --password $TAC_USERPASS 2>/dev/null` 
+		declare -a RESULT=`echo $CHECK | awk '{print $2}'`
+		echo ""
 
-	if [[ $RESULT == "PASS" ]]; then
-#	        echo "Login PASS"
-		export PORTEX_USERID=$TAC_USERID
-
-		declare -a AAA_GROUP=`$TAC_CLIENT -u $TAC_USERID -H $TAC_SERVER -k $TAC_KEY -v authorize -c service=portex-tacmenu cmd=tacmenu | egrep "av-pairs:" -A 3 | awk -F^ '{print $2}' | egrep tacmenu 2>/dev/null`
-
-		case $AAA_GROUP in
-			tacmenusu*)
-#				echo "Launch tacmenusu"
-				[ ${PORTEX_CONF[LOG_ENABLE]} == "ON" ] &&  write_log_buffer auth info LOGIN "Administrator $TAC_USERID login successfully from $SSH_SOURCE by TACACS+ server $TAC_SERVER authentication."
-				/usr/local/bin/tacmenusu
-				exit 0
-				;;
-			tacmenuop*)
-#				echo "Launch tacmenuop"
-				[ ${PORTEX_CONF[LOG_ENABLE]} == "ON" ] && write_log_buffer auth info LOGIN "Operator $TAC_USERID login successfully from $SSH_SOURCE by TACACS+ server $TAC_SERVER authentication."
-				/usr/local/bin/tacmenuop
-				exit 0
-				;;
-			*)
-				echo "No matched authorization group"
-				exit 1
-				;;
-		esac
-		exit 0
-	else
-		ERROR_ACCT[$TRY_COUNT]=$TAC_USERID
-		TRY_COUNT=$((TRY_COUNT + 1))
-		if [ $TRY_COUNT -le 2 ]; then
-			echo "Incorrect TACACS+ username or password, try again"
-			echo ""
+		if [[ $RESULT == "PASS" ]]; then
+			export PORTEX_USERID=$TAC_USERID
+			declare -a AAA_GROUP=`$TAC_CLIENT -u $TAC_USERID -H $TAC_SERVER -k $TAC_KEY -v authorize -c service=portex-tacmenu cmd=tacmenu | egrep "av-pairs:" -A 3 | awk -F^ '{print $2}' | egrep tacmenu 2>/dev/null`
+			case $AAA_GROUP in
+				tacmenusu*)
+					[ ${PORTEX_CONF[LOG_ENABLE]} == "ON" ] &&  write_log_buffer auth info LOGIN "Administrator $TAC_USERID login successfully from $SSH_SOURCE by TACACS+ server $TAC_SERVER authentication."
+					/usr/local/bin/tacmenusu
+					exit 0
+					;;
+				tacmenuop*)
+					[ ${PORTEX_CONF[LOG_ENABLE]} == "ON" ] && write_log_buffer auth info LOGIN "Operator $TAC_USERID login successfully from $SSH_SOURCE by TACACS+ server $TAC_SERVER authentication."
+					/usr/local/bin/tacmenuop
+					exit 0
+					;;
+				*)
+					echo "No matched authorization group"
+					exit 1
+					;;
+			esac
+			exit 0
 		else
-			echo ""
-			ERROR_ACCT_LIST=`echo ${ERROR_ACCT[@]}`
-			write_log_buffer auth info LOGIN "Multiple login failed from IP:$SSH_SOURCE, attemp account:$ERROR_ACCT_LIST" >/dev/null 2>&1
-			echo "Login failed."
-			exit 1
+			ERROR_ACCT[$TRY_COUNT]=$TAC_USERID
+			TRY_COUNT=$((TRY_COUNT + 1))
+			if [ $TRY_COUNT -le 2 ]; then
+				echo "Incorrect TACACS+ username or password, try again"
+				echo ""
+			else
+				echo ""
+				ERROR_ACCT_LIST=`echo ${ERROR_ACCT[@]}`
+				write_log_buffer auth info LOGIN "Multiple login failed from IP:$SSH_SOURCE, attemp account:$ERROR_ACCT_LIST" >/dev/null 2>&1
+				echo "Login failed."
+				exit 1
+			fi
 		fi
-
-	fi
-
-done
-
+	done
 fi
+
 #
 # Check username/password from local account
 #
@@ -137,14 +116,6 @@ else
 fi
 echo ""
 
-#declare LOCALID
-#while [ -z "$LOCALID" ]
-#do
-#	read -p "$HOSTNAME (LOCAL) login: " LOCALID
-#done
-#
-#	/usr/bin/sudo /bin/login $LOCALID
-
 # 
 # Check username/password from local account
 TRY_COUNT=0
@@ -152,53 +123,55 @@ while [ TRUE ]; do
 	LOCAL_USERID=""
 	LOCAL_USERPASS=""
 
-#read -p "$HOSTNAME (LOCAL) login: " LOCAL_USERID
-while [ ! $LOCAL_USERID ]; do
-#	echo ""
-	read -p "$HOSTNAME (LOCAL) login: " LOCAL_USERID
-done
+	while [ ! $LOCAL_USERID ]; do
+		read -p "$HOSTNAME (LOCAL) login: " LOCAL_USERID
+	done
 
-#read -sp "$HOSTNAME login password: " LOCAL_USERPASS
-while [ ! $LOCAL_USERPASS ]; do
-	read -sp "$HOSTNAME login password: " LOCAL_USERPASS
+	while [ ! $LOCAL_USERPASS ]; do
+		read -sp "$HOSTNAME login password: " LOCAL_USERPASS
+		echo ""
+	done
+	
 	echo ""
-done
-echo ""
 
-cat $PORTEX_SYS | egrep -v '#' | egrep "^$LOCAL_USERID:localuser:" >/dev/null 2>&1
-if [ $? -eq 0 ]; then
-	LOCAL_ACCT_NAME=`cat $PORTEX_SYS | egrep -v '#' | egrep "^$LOCAL_USERID:localuser:" | awk -F: '{print $1}'`
-	LOCAL_ACCT_PRIVILEGE=`cat $PORTEX_SYS | egrep -v '#' | egrep "^$LOCAL_USERID:localuser:" | awk -F: '{print $3}'`
-	LOCAL_ACCT_CRYPT=`cat $PORTEX_SYS | egrep -v '#' | egrep "^$LOCAL_USERID:localuser:" | awk -F: '{print $4}'`
-#	echo $LOCAL_ACCT_CRYPT
-#	LOCAL_ACCT_METHOD=`echo $LOCAL_ACCT_CRYPT | awk -F$ '{print $2}'`
-#	LOCAL_ACCT_SALT=`echo $LOCAL_ACCT_CRYPT | awk -F$ '{print $3}'`
-
-#	LOCAL_USERPASS_CRYPT=`/usr/bin/mkpasswd --method=SHA-512 -S $LOCAL_ACCT_SALT $LOCAL_USERPASS`
-#	echo $LOCAL_USERPASS_CRYPT
-
-	PASS_CHECK -c $LOCAL_USERPASS:$LOCAL_ACCT_CRYPT
-#	OLDPASS_CHECK $LOCAL_USERPASS $LOCAL_ACCT_CRYPT
+	cat $PORTEX_SYS | egrep -v '#' | egrep "^$LOCAL_USERID:localuser:" >/dev/null 2>&1
 	if [ $? -eq 0 ]; then
-#	if [ $LOCAL_ACCT_CRYPT == $LOCAL_USERPASS_CRYPT ]; then
-#		echo "Password is the same"
-		export PORTEX_USERID=$LOCAL_ACCT_NAME
-		case $LOCAL_ACCT_PRIVILEGE in
-			admin)
-				write_log_buffer auth info LOGIN "Administrator $LOCAL_USERID login successfully from $SSH_SOURCE by local password authentication."
-				/usr/local/bin/tacmenusu
-				exit 0
-				;;
-			op)
-				write_log_buffer auth info LOGIN "Operator $LOCAL_USERID login successfully from $SSH_SOURCE by local password authentication."
-				/usr/local/bin/tacmenuop
-				exit 0
-				;;
-			*)
-				echo "No privilege group matched."
+		LOCAL_ACCT_NAME=`cat $PORTEX_SYS | egrep -v '#' | egrep "^$LOCAL_USERID:localuser:" | awk -F: '{print $1}'`
+		LOCAL_ACCT_PRIVILEGE=`cat $PORTEX_SYS | egrep -v '#' | egrep "^$LOCAL_USERID:localuser:" | awk -F: '{print $3}'`
+		LOCAL_ACCT_CRYPT=`cat $PORTEX_SYS | egrep -v '#' | egrep "^$LOCAL_USERID:localuser:" | awk -F: '{print $4}'`
+		PASS_CHECK -c $LOCAL_USERPASS:$LOCAL_ACCT_CRYPT
+		if [ $? -eq 0 ]; then
+			export PORTEX_USERID=$LOCAL_ACCT_NAME
+			case $LOCAL_ACCT_PRIVILEGE in
+				admin)
+					write_log_buffer auth info LOGIN "Administrator $LOCAL_USERID login successfully from $SSH_SOURCE by local password authentication."
+					/usr/local/bin/tacmenusu
+					exit 0
+					;;
+				op)
+					write_log_buffer auth info LOGIN "Operator $LOCAL_USERID login successfully from $SSH_SOURCE by local password authentication."
+					/usr/local/bin/tacmenuop
+					exit 0
+					;;
+				*)
+					echo "No privilege group matched."
+					exit 1
+					;;
+			esac
+		else
+			ERROR_ACCT[$TRY_COUNT]=$LOCAL_USERID
+			TRY_COUNT=$((TRY_COUNT + 1))
+			if [ $TRY_COUNT -le 2 ]; then
+				echo "Local username/password is NOT correct; try again."
+				echo ""
+			else
+				echo ""
+				ERROR_ACCT_LIST=`echo ${ERROR_ACCT[@]}`
+				write_log_buffer auth info LOGIN "Multiple login failed from IP:$SSH_SOURCE, attemp account:$ERROR_ACCT_LIST" >/dev/null 2>&1
+				echo "Login failed."
 				exit 1
-				;;
-		esac
+			fi
+		fi
 	else
 		ERROR_ACCT[$TRY_COUNT]=$LOCAL_USERID
 		TRY_COUNT=$((TRY_COUNT + 1))
@@ -213,19 +186,4 @@ if [ $? -eq 0 ]; then
 			exit 1
 		fi
 	fi
-
-else
-	ERROR_ACCT[$TRY_COUNT]=$LOCAL_USERID
-	TRY_COUNT=$((TRY_COUNT + 1))
-	if [ $TRY_COUNT -le 2 ]; then
-		echo "Local username/password is NOT correct; try again."
-		echo ""
-	else
-		echo ""
-		ERROR_ACCT_LIST=`echo ${ERROR_ACCT[@]}`
-		write_log_buffer auth info LOGIN "Multiple login failed from IP:$SSH_SOURCE, attemp account:$ERROR_ACCT_LIST" >/dev/null 2>&1
-		echo "Login failed."
-		exit 1
-	fi
-fi
 done

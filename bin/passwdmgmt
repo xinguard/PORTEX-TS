@@ -1,5 +1,4 @@
 #!/bin/bash
-
 #
 # Password check routine
 #
@@ -27,7 +26,6 @@ function NEWPASS_NOTIFY(){
 function NEWPASS_CHECK(){
 	INPUT_PASS1="$1"
 	INPUT_PASS2="$2"
-#	echo $INPUT_PASS1 $INPUT_PASS2
 	
 if [ $INPUT_PASS1 == $INPUT_PASS2 ]; then
 
@@ -35,7 +33,6 @@ if [ $INPUT_PASS1 == $INPUT_PASS2 ]; then
 	declare -a PWD_SCORE=(0 0 0 0)
 
 	CHAR_COUNT=`echo ${#INPUT_PASS1}`; [ $CHAR_COUNT -ge 8 ] && LEN_SCORE=1
-#	echo "LEN_SCORE is " $LEN_SCORE
 	echo $INPUT_PASS1 | egrep "[A-Z]" >/dev/null 2>&1; [ $? -eq 0 ] && PWD_SCORE[0]=1
 	echo $INPUT_PASS1 | egrep "[a-z]" >/dev/null 2>&1; [ $? -eq 0 ] && PWD_SCORE[1]=1
 	echo $INPUT_PASS1 | egrep "[0-9]" >/dev/null 2>&1; [ $? -eq 0 ] && PWD_SCORE[2]=1
@@ -48,7 +45,6 @@ if [ $INPUT_PASS1 == $INPUT_PASS2 ]; then
 
 	declare -i SCORE_RESULT=0
 	SCORE_RESULT=$(($LEN_SCORE * $SUM_SCORE))
-#	echo "Password score: " $SCORE_RESULT
 
 	if [ $SCORE_RESULT -ge 3 ]; then
 		return 0
@@ -73,14 +69,10 @@ function OLDPASS_CHECK(){
 
 	INPUT_SALT=`echo $INPUT_CRYPT | awk -F$ '{print $3}'`
 	OUTPUT_CRYPT=`/usr/bin/mkpasswd --method=SHA-512 -S $INPUT_SALT $INPUT_PASSWD`
-#	echo "INPUT_CRYPT is : " $INPUT_CRYPT
-#	echo "OUTPUT_CRYPT is : " $OUTPUT_CRYPT
 
 	if [ $INPUT_CRYPT == $OUTPUT_CRYPT ]; then
-#		echo "The password is the same."
 		return 0
 	else
-#		echo "The password is NOT the same."
 		return 1
 	fi
 
@@ -88,46 +80,24 @@ function OLDPASS_CHECK(){
 
 
 function PASS_CHECK(){
-#	echo "Running PASS_CHECK"
 	local OPTIND OPT c n
         while getopts ":c:n:" OPT; do
-                set -f
-                IFS=':'
-#		echo "Step 1"
-                declare PWD_ARRAY=($2)
-#                echo "Total Noumber of arguments = ${#PWD_ARRAY[@]}"
-#		echo "Step 2"
-                case $OPT in
-                        c)
-#                                echo "Input password text is: " ${PWD_ARRAY[0]}
-#                                echo "Input password encrypt is: " ${PWD_ARRAY[1]}
-				OLDPASS_CHECK ${PWD_ARRAY[0]} ${PWD_ARRAY[1]}
-				return $?
-#				echo "-c result is" $?
-                                ;;
-                        n)
-#                                echo "Input password 1 is: " ${PWD_ARRAY[0]}
-#                                echo "Input password 2 is: " ${PWD_ARRAY[1]}
-				NEWPASS_CHECK ${PWD_ARRAY[0]} ${PWD_ARRAY[1]}
-				return $?
-#				echo "-n result is" $?
-                                ;;
-                        *)
-                                echo "Invalid option/argument."
-                                ;;
-                esac
-#		echo "Step 3"
+            set -f
+            IFS=':'
+            declare PWD_ARRAY=($2)
+            case $OPT in
+                c)
+					OLDPASS_CHECK ${PWD_ARRAY[0]} ${PWD_ARRAY[1]}
+					return $?
+                    ;;
+                n)
+					NEWPASS_CHECK ${PWD_ARRAY[0]} ${PWD_ARRAY[1]}
+					return $?
+                    ;;
+                *)
+                    echo "Invalid option/argument."
+                    ;;
+            esac
         done
-#	echo "Step 4"
 }
-
-#read -p "Enter option: " CMD_OPT
-#read -p "Enter PASS1: " CMD_ARG1
-#read -p "Enter PASS2: " CMD_ARG2
-
-#PASS_CHECK -c 'Xinguard':'$6$mrIdKxM0$sIYXlqjKrDdytHhoy1kLH2p7xGe9s92xTKjMtbBa1UhVYZy5qPD4wyS8M.JGimByAmYO.6.j63rwIt/IT4oyU.'
-
-#echo $CMD_OPT $CMD_ARG1 $CMD_ARG2
-#echo ""
-#PASS_CHECK $CMD_OPT $CMD_ARG1:$CMD_ARG2
 

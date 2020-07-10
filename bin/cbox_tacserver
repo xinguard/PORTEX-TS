@@ -1,9 +1,7 @@
 #!/bin/bash
-
 #
 # Configured script to configure TACACS+ server information
 #
-REV=20190221
 
 source /usr/local/bin/configmgmt
 

@@ -3,7 +3,6 @@
 #
 # Configured script to set Ethernet and WiFi configuration
 #
-REV=20190221
 
 CBOX_ETHERNET="/usr/local/bin/cbox_ethernet"
 CBOX_WIFI="/usr/local/bin/cbox_wifi"

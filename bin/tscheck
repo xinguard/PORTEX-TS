@@ -1,5 +1,7 @@
 #!/bin/bash
-
+#
+#
+#
 source /usr/local/bin/writelog
 source /usr/local/bin/configmgmt
 PORTEX_SYS="/home/ssuser/portex_sys.conf"
@@ -43,14 +45,13 @@ function TAC_TEST(){
 			TSC_FLAG=0
 
 	        fi
-																					fi
+	fi
 	echo ""
 }
 
 declare LAST_STATUS=""
 TAC_TEST
-if [ $TSC_FLAG -eq 1 ]
-then
+if [ $TSC_FLAG -eq 1 ]; then
 	echo "Initial status is OKOK"
 	LAST_STATUS="OKOK"
 else
@@ -63,58 +64,55 @@ echo ""
 declare TAC_OKOK=0
 declare TAC_FAIL=0
 
-while [ TRUE ]
-do
-echo "Last status is $LAST_STATUS"
-case $LAST_STATUS in
-	OKOK)
-		echo "New status is OKOK"
-		COUNT=1
-		while [ $COUNT -le 4 ]
-		do
-			sleep $PERIOD
-			TAC_TEST
-			if [ $TSC_FLAG -eq 1 ];then
-				TAC_OKOK=0
-				TAC_FAIL=0
-				break
-			else
-				TAC_FAIL=$((TAC_FAIL + 1))
-				COUNT=$((COUNT + 1))
-				echo "TAC_FAIL count is $TAC_FAIL"
-				if [ $TAC_FAIL -eq 4 ];then
-					echo "Send loss log"
-					write_log_buffer cron crit TACACS "Loss ALL TACACS+ server connection!"
-					TAC_FAIL=0
-					LAST_STATUS="FAIL"
-				fi
-			fi
-		done
-		;;
-	FAIL)
-		echo "New status is FAILED"
-		COUNT=1
-		while [ $COUNT -le 4 ]
-		do
-			sleep $PERIOD
-			TAC_TEST
-			if [ $TSC_FLAG -eq 0 ];then
-				TAC_FAIL=0
-				TAC_OKOK=0
-				break
-			else
-				TAC_OKOK=$((TAC_OKOK + 1))
-				COUNT=$((COUNT + 1))
-				echo "TAC_OKOK count is $TAC_OKOK"
-				if [ $TAC_OKOK -eq 4 ];then
-					echo "Send restore log"
-					write_log_buffer cron notice TACACS  "One of TACACS+ server connection restore."
+while [ TRUE ]; do
+	echo "Last status is $LAST_STATUS"
+	case $LAST_STATUS in
+		OKOK)
+			echo "New status is OKOK"
+			COUNT=1
+			while [ $COUNT -le 4 ]; do
+				sleep $PERIOD
+				TAC_TEST
+				if [ $TSC_FLAG -eq 1 ];then
 					TAC_OKOK=0
-					LAST_STATUS="OKOK"
+					TAC_FAIL=0
+					break
+				else
+					TAC_FAIL=$((TAC_FAIL + 1))
+					COUNT=$((COUNT + 1))
+					echo "TAC_FAIL count is $TAC_FAIL"
+					if [ $TAC_FAIL -eq 4 ];then
+						echo "Send loss log"
+						write_log_buffer cron crit TACACS "Loss ALL TACACS+ server connection!"
+						TAC_FAIL=0
+						LAST_STATUS="FAIL"
+					fi
 				fi
-			fi
-		done
-		;;
-esac
+			done
+			;;
+		FAIL)
+			echo "New status is FAILED"
+			COUNT=1
+			while [ $COUNT -le 4 ]; do
+				sleep $PERIOD
+				TAC_TEST
+				if [ $TSC_FLAG -eq 0 ];then
+					TAC_FAIL=0
+					TAC_OKOK=0
+					break
+				else
+					TAC_OKOK=$((TAC_OKOK + 1))
+					COUNT=$((COUNT + 1))
+					echo "TAC_OKOK count is $TAC_OKOK"
+					if [ $TAC_OKOK -eq 4 ];then
+						echo "Send restore log"
+						write_log_buffer cron notice TACACS  "One of TACACS+ server connection restore."
+						TAC_OKOK=0
+						LAST_STATUS="OKOK"
+					fi
+				fi
+			done
+			;;
+	esac
 done
 
