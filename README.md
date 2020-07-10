@@ -9,7 +9,7 @@ $ sudo apt-get install python-pip
 $ sudo pip install --upgrade pip  
 
 ### Necessary package installation:
-$ sudo apt-get -y install minicom tmux whois  
+$ sudo apt-get -y install minicom tmux whois ntp ntpdate   
 
 ### Local user account creation
 $ sudo adduser --home /home/ssuser --shell /usr/local/bin/taclogin -m -U ssuser  

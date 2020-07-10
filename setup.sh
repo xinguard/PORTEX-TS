@@ -19,8 +19,11 @@ su -s /bin/bash ssuser -c "cp etc/portex_sys.conf ~ssuser"
 su -s /bin/bash ssuser -c "cp etc/.tmux.conf ~ssuser"
 
 # Modify sshd configuration for no password login
-sed -i 's/^#PermitEmptyPasswords no/PermitEmptyPasswords no/' /etc/ssh/sshd_config
+sed -i 's/^#PermitEmptyPasswords no/PermitEmptyPasswords yes/' /etc/ssh/sshd_config
 sed -i 's/^UsePAM yes/UsePAM no/' /etc/ssh/sshd_config
+passwd -d ssuser
+service ssh reload
+
 
 
 
