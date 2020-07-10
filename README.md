@@ -9,7 +9,7 @@ $ sudo apt-get install python-pip
 $ sudo pip install --upgrade pip  
 
 ### Necessary package installation:
-$ sudo apt-get -y install minicom tmux whois ntp ntpdate   
+$ sudo apt-get -y install minicom tmux whois ntpdate   
 
 ### Local user account creation
 $ sudo adduser --home /home/ssuser --shell /usr/local/bin/taclogin -m -U ssuser  
@@ -23,7 +23,7 @@ $ sudo /bin/bash setup.sh
 ### System service register
 $ sudo update-rc.d led-daemon defaults  
 $ sudo update-rc.d pwr-and-control-button-monitor defaults  
-$ sudo sed -i '19a/opt/mcs/cbox/cboxboot.sh & >/dev/null 2>&1\n' /etc/rc.local  
+$ sudo sed -i '19a/usr/local/bin/portex-ts.init' /etc/rc.local  
   
 ### Cron table setup for watchdog
 $ sudo crontab -e  
