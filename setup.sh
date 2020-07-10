@@ -15,7 +15,7 @@ cp etc/led-daemon /etc/init.d
 cp etc/ssuser /etc/sudoers.d
 
 # Install configuration files for ssuser
-su -s /bin/bash ssuser -c "cp etc/portex_sys.conf ~ssuser"
+[ ! -f ~ssuser/portex_sys.conf ] && su -s /bin/bash ssuser -c "cp etc/portex_sys.conf ~ssuser"
 su -s /bin/bash ssuser -c "cp etc/.tmux.conf ~ssuser"
 
 # Modify sshd configuration for no password login
