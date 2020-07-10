@@ -3,11 +3,6 @@
 # Setup tool to install programs and update relative files
 #
 
-# /etc/udev/rules.d/90-usb-serial.rules
-# /etc/init.d/led-daemon
-# /home/ssuser/portex_sys.conf
-# /home/ssuser/ssuser
-
 # Install programs to /usr/local/bin
 for file in `ls bin`
 do
@@ -23,7 +18,9 @@ cp etc/ssuser /etc/sudoers.d
 su -s /bin/bash ssuser -c "cp etc/portex_sys.conf ~ssuser"
 su -s /bin/bash ssuser -c "cp etc/.tmux.conf ~ssuser"
 
-
+# Modify sshd configuration for no password login
+sed -i 's/^#PermitEmptyPasswords no/PermitEmptyPasswords no/' /etc/ssh/sshd_config
+sed -i 's/^UsePAM yes/UsePAM no/' /etc/ssh/sshd_config
 
 
 
