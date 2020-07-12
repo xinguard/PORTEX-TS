@@ -9,11 +9,12 @@ $ sudo apt-get install python-pip
 $ sudo pip install --upgrade pip  
 
 ### Necessary package installation:
-$ sudo apt-get -y install git minicom tmux whois ntpdate   
+$ sudo apt-get -y install dialog git minicom tmux whois ntpdate   
 $ sudo pip install tacacs_plus   
 
 ### Local user account creation
 $ sudo useradd --home /home/ssuser --shell /usr/local/bin/taclogin -m -U ssuser  
+$ sudo usermod -a -G dialout ssuser    
 
 ### PORTEX-TS program installation
 $ cd /tmp  
