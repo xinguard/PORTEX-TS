@@ -1,0 +1,49 @@
+#! /bin/sh
+#
+# Reference:
+# http://blog.itist.tw/2017/03/diy-power-and-reset-button-for-raspberry-pi.html
+
+### BEGIN INIT INFO
+# Provides:          pwr-and-control-button-moniter
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+### END INIT INFO
+
+case "$1" in
+  start)
+    echo "Starting pwr-and-control-button-monitor"
+    /usr/local/bin/admin_pwr.py >/dev/null &
+    ;;
+  stop)
+    echo "Stopping pwr-and-control-button-monitor"
+    PID=`ps ax | grep admin_pwr | grep -v grep | awk '{print $1}'`
+    if [ $PID ]; then
+      kill -HUP $PID
+    fi
+    ;;
+  restart)
+    echo "Restart pwr-and-control-button-monitor"
+    PID=`ps ax | grep admin_pwr | grep -v grep | awk '{print $1}'`
+    if [ $PID ]; then
+      kill -HUP $PID
+    fi
+    /usr/local/bin/admin_pwr.py >/dev/null &
+    ;;
+  status)
+    PID=`ps ax | grep admin_pwr | grep -v grep | awk '{print $1}'`
+    if [ $PID ]; then
+      echo "pwr/Admin/MCSC button monitoring is on"
+    else
+      echo "pwr/Admin/MCSC button monitoring is off"
+    fi
+    ;;
+  *)
+    echo "Usage: service pwr-and-control-button-monitor {start|stop|restart|status}"
+    exit 1
+    ;;
+esac
+
+exit 0 
+
