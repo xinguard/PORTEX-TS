@@ -7,7 +7,7 @@ export PATH=/sbin:${PATH}
 
 source /usr/local/bin/configmgmt
 
-PORTEX_SYS="/home/ssuser/portex_sys.conf"
+PORTEX_SYS="/home/portex/portex_sys.conf"
 declare -A PORTEX_CONF
 CONFIG_READ $PORTEX_SYS TMUX_
 

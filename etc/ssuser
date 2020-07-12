@@ -1,6 +1,0 @@
-# Allow ssuser to execute login command
-ssuser  ALL=(root) !/bin/login, NOPASSWD:/bin/login [A-Za-z]*, !/bin/login ssuser
-ssuser  ALL=(root) NOPASSWD:/usr/bin/vcgencmd
-ssuser  ALL=(root) NOPASSWD:/bin/cat /etc/tac_server.conf
-ssuser  ALL=(root) NOPASSWD:/usr/local/bin/cbox_cli
-#ssuser ALL=(ALL:ALL) NOPASSWD:ALL

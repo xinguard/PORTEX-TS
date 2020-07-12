@@ -10,7 +10,7 @@ ps auxf | egrep -w $PROG_NAME | egrep -v "grep|$PPID|$$" >/dev/null 2>&1
 source /usr/local/bin/configmgmt
 
 LOG_BUFFER="/dev/shm/log_buffer"
-PORTEX_SYS="/home/ssuser/portex_sys.conf"
+PORTEX_SYS="/home/portex/portex_sys.conf"
 
 #
 # Initial variables

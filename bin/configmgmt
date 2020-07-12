@@ -4,7 +4,7 @@
 #
 
 function CONFIG_CHANGE(){
-	CONF_FILE="/home/ssuser/portex_sys.conf"
+	CONF_FILE="/home/portex/portex_sys.conf"
 
 	local OPTIND OPT m d a p
 	while getopts ":m:d:a:p:" OPT; do

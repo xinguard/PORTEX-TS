@@ -4,7 +4,7 @@
 #
 source /usr/local/bin/writelog
 source /usr/local/bin/configmgmt
-PORTEX_SYS="/home/ssuser/portex_sys.conf"
+PORTEX_SYS="/home/portex/portex_sys.conf"
 
 trap "CONFIG_READ $PORTEX_SYS RCHK_" SIGHUP
 
@@ -17,7 +17,7 @@ else
 		[ `echo $1 | egrep '^[0-9]+$'` ] && PERIOD=$1	# Check if $1 is an interger
 fi
 
-TAC_SERVER_INFO="/home/ssuser/portex_sys.conf"
+TAC_SERVER_INFO="/home/portex/portex_sys.conf"
 
 function TAC_TEST(){
 	TAC_SERVER1=`cat $TAC_SERVER_INFO | egrep -v '#' | egrep TAC_SERVER1_IP | awk -F= '{print $2}'`

@@ -13,8 +13,8 @@ $ sudo apt-get -y install dialog git minicom tmux whois ntpdate
 $ sudo pip install tacacs_plus   
 
 ### Local user account creation
-$ sudo useradd --home /home/ssuser --shell /usr/local/bin/taclogin -m -U ssuser  
-$ sudo usermod -a -G dialout ssuser    
+$ sudo useradd --home /home/portex --shell /usr/local/bin/taclogin -G dialout -m -U portex   
+$ sudo usermod -a -G dialout portex    
 
 ### PORTEX-TS program installation
 $ cd /tmp  

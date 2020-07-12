@@ -12,16 +12,16 @@ done
 # Install program to /etc
 cp etc/90-usb-serial.rules /etc/udev/rules.d
 cp etc/led-daemon /etc/init.d
-cp etc/ssuser /etc/sudoers.d
+cp etc/portex /etc/sudoers.d
 
-# Install configuration files for ssuser
-[ ! -f ~ssuser/portex_sys.conf ] && su -s /bin/bash ssuser -c "cp etc/portex_sys.conf ~ssuser"
-su -s /bin/bash ssuser -c "cp etc/.tmux.conf ~ssuser"
+# Install configuration files for portex
+[ ! -f ~portex/portex_sys.conf ] && su -s /bin/bash portex -c "cp etc/portex_sys.conf ~portex"
+su -s /bin/bash portex -c "cp etc/.tmux.conf ~portex"
 
 # Modify sshd configuration for no password login
 sed -i 's/^#PermitEmptyPasswords no/PermitEmptyPasswords yes/' /etc/ssh/sshd_config
 sed -i 's/^UsePAM yes/UsePAM no/' /etc/ssh/sshd_config
-passwd -d ssuser
+passwd -d portex
 service ssh reload
 
 

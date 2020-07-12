@@ -4,7 +4,7 @@
 #
 source /usr/local/bin/writelog
 source /usr/local/bin/configmgmt
-PORTEX_SYS="/home/ssuser/portex_sys.conf"
+PORTEX_SYS="/home/portex/portex_sys.conf"
 
 trap "CONFIG_READ $PORTEX_SYS RCHK_" SIGHUP
 

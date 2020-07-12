@@ -5,8 +5,8 @@
 /usr/local/bin/concontrol
 
 # Log initial
-su -s /bin/bash ssuser -c "/usr/local/bin/logbufferinit"
-su -s /bin/bash ssuser -c "/usr/local/bin/sendlog >/dev/null 2>&1 &"
+su -s /bin/bash portex -c "/usr/local/bin/logbufferinit"
+su -s /bin/bash portex -c "/usr/local/bin/sendlog >/dev/null 2>&1 &"
 
 # LED initial
 echo -e "green_blink\c" | sudo nc -q 1 -U /var/run/uds_led
