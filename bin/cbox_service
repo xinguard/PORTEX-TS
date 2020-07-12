@@ -31,7 +31,7 @@ case "$REPLY" in
 
 3) echo "Connection ACL management: "
 	echo ""
-	/usr/local/bin/cbox_acl
+	sudo /usr/local/bin/cbox_acl
 	echo ""
 	;;
 

@@ -1,7 +1,6 @@
 # Allow portex to execute login command
-portex  ALL=(root) !/bin/login, NOPASSWD:/bin/login [A-Za-z]*, !/bin/login ssuser
+portex  ALL=(root) !/bin/login, NOPASSWD:/bin/login [A-Za-z]*, !/bin/login portex
 portex  ALL=(root) NOPASSWD:/usr/bin/vcgencmd
-portex  ALL=(root) NOPASSWD:/bin/cat /etc/tac_server.conf
 portex  ALL=(root) NOPASSWD:/usr/local/bin/cbox_cli
 portex  ALL=(root) NOPASSWD:/usr/local/bin/cbox_acl
 #portex ALL=(ALL:ALL) NOPASSWD:ALL

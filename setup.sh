@@ -13,6 +13,7 @@ done
 cp etc/90-usb-serial.rules /etc/udev/rules.d
 cp etc/led-daemon /etc/init.d
 cp etc/portex /etc/sudoers.d
+chmod 440 /etc/sudoers.d/portex
 
 # Install configuration files for portex
 [ ! -f ~portex/portex_sys.conf ] && su -s /bin/bash portex -c "cp etc/portex_sys.conf ~portex"
