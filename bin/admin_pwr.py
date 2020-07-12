@@ -56,7 +56,7 @@ admin_flag = 0
 op_white = 0
 op_yellow = 0
 
-CONF_PATH = "/opt/mcs/conf/program_config.txt"
+CONF_PATH = "/home/portex/program_config.txt"
 
 
 def send_command(message):
@@ -91,8 +91,8 @@ def power_callback(channel):
             if (pressed_time >= REBOOT_TIMER):
                 os.system('wall "Power button pressed for reboot...."')
                 send_command("green_blink")
-                subprocess.call(['/opt/mcs/tnlctl/bin/tnlctl.sh', 'stop'], shell=False)
-                subprocess.call(['/opt/mcs/submods/proxy/scripts/ctl.sh', 'stop'], shell=False)
+                # subprocess.call(['/opt/mcs/tnlctl/bin/tnlctl.sh', 'stop'], shell=False)
+                # subprocess.call(['/opt/mcs/submods/proxy/scripts/ctl.sh', 'stop'], shell=False)
                 print "MCS Cloud disconnect......."
                 syslog.syslog(syslog.LOG_INFO, "MCS cloud disconnect.")
                 os.system('shutdown -r now')
@@ -106,8 +106,8 @@ def power_callback(channel):
         else:
             os.system('wall "Power button pressed for power off..."')
             send_command("green_blink")
-            subprocess.call(['/opt/mcs/tnlctl/bin/tnlctl.sh', 'stop'], shell=False)
-            subprocess.call(['/opt/mcs/submods/proxy/scripts/ctl.sh', 'stop'], shell=False)
+            # subprocess.call(['/opt/mcs/tnlctl/bin/tnlctl.sh', 'stop'], shell=False)
+            # subprocess.call(['/opt/mcs/submods/proxy/scripts/ctl.sh', 'stop'], shell=False)
             print "MCS Cloud disconnect......."
             syslog.syslog(syslog.LOG_INFO, "MCS cloud disconnect.")
             os.system('shutdown -h now')
@@ -162,12 +162,12 @@ def run_mcsc(type):
     if not command_list:
         # run standard command here.
         if type == "start":
-            subprocess.call(['/opt/mcs/tnlctl/bin/tnlctl.sh', 'start'], shell=False)
+            # subprocess.call(['/opt/mcs/tnlctl/bin/tnlctl.sh', 'start'], shell=False)
             print "MCS Cloud connect......."
             syslog.syslog(syslog.LOG_INFO, "MCS cloud connect.")
         elif type == "stop":
-            subprocess.call(['/opt/mcs/tnlctl/bin/tnlctl.sh', 'stop'], shell=False)
-            subprocess.call(['/opt/mcs/submods/proxy/scripts/ctl.sh', 'stop'], shell=False)
+            # subprocess.call(['/opt/mcs/tnlctl/bin/tnlctl.sh', 'stop'], shell=False)
+            # subprocess.call(['/opt/mcs/submods/proxy/scripts/ctl.sh', 'stop'], shell=False)
             print "MCS Cloud disconnect......."
             syslog.syslog(syslog.LOG_INFO, "MCS cloud disconnect.")
     else:
@@ -365,15 +365,15 @@ def run_admin(type):
         # run standard command here.
         print type
         if type == "start":
-            #subprocess.call(['python', '/opt/mcs/cbox_panel_control/bin/led_bt_server.py'],
+            # subprocess.call(['python', '/opt/mcs/cbox_panel_control/bin/led_bt_server.py'],
             #                shell=False)
-            #os.system('service bluetooth start')
-            os.system('/opt/mcs/cbox_panel_control/bin/led_bt_server.py > /dev/null &')
+            # os.system('service bluetooth start')
+            # os.system('/opt/mcs/cbox_panel_control/bin/led_bt_server.py > /dev/null &')
             print "Bluetooth console enable"
             syslog.syslog(syslog.LOG_INFO, "Bluetooth console enable.")
         elif type == "stop":
-            subprocess.call(['ps -ef | grep led_bt_server | grep -v grep |awk \'{print "kill "$2}\' | bash'], shell=True)
-            os.system('service bluetooth stop')
+            # subprocess.call(['ps -ef | grep led_bt_server | grep -v grep |awk \'{print "kill "$2}\' | bash'], shell=True)
+            # os.system('service bluetooth stop')
             send_command("return_to_operation")
             print "Bluetooth console disable"
             syslog.syslog(syslog.LOG_INFO, "Bluetooth console disable.")

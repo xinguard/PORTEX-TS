@@ -10,7 +10,7 @@ $ sudo pip install --upgrade pip
 
 ### Necessary package installation:
 $ sudo apt-get -y install dialog git minicom tmux whois ntpdate   
-$ sudo pip install tacacs_plus   
+$ sudo pip install tacacs_plus RPi.GPIO   
 
 ### Local user account creation
 $ sudo useradd --home /home/portex --shell /usr/local/bin/taclogin -G dialout -m -U portex   
