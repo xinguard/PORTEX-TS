@@ -13,7 +13,7 @@ $ sudo apt-get -y install minicom tmux whois ntpdate
 $ sudo pip install tacacs_plus   
 
 ### Local user account creation
-$ sudo adduser --home /home/ssuser --shell /usr/local/bin/taclogin -m -U ssuser  
+$ sudo useradd --home /home/ssuser --shell /usr/local/bin/taclogin -m -U ssuser  
 
 ### PORTEX-TS program installation
 $ cd /tmp  
