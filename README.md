@@ -14,7 +14,6 @@ $ sudo pip install tacacs_plus
 
 ### Local user account creation
 $ sudo useradd --home /home/portex --shell /usr/local/bin/taclogin -G dialout -m -U portex   
-$ sudo usermod -a -G dialout portex    
 
 ### PORTEX-TS program installation
 $ cd /tmp  
