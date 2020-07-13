@@ -27,9 +27,8 @@ $ sudo update-rc.d pwr-and-control-button-monitor defaults
 $ sudo sed -i '19a/usr/local/bin/portex.init\n' /etc/rc.local  
   
 ### Cron table setup for watchdog
-$ sudo crontab -e  
-$ add "* * * * * /usr/local/bin/usbcheck"  
-$ add "0 * * * * /usr/local/bin/regreport"  
+$ sudo sed -i '$ a* * * * * \/usr\/local\/bin\/usbcheck' /var/spool/cron/crontabs/root  
+$ sudo sed -i '$ a* * * * * \/usr\/local\/bin\/regreport' /var/spool/cron/crontabs/root   
 
 ### Reboot
 $ sudo shutdown -r now  
