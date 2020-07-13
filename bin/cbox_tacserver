@@ -5,7 +5,7 @@
 
 source /usr/local/bin/configmgmt
 
-PORTEX_SYS="/home/portex/portex_ts.conf"
+PORTEX_TS_CONF="/home/portex/portex_ts.conf"
 
 
 prompt="Select function options: "
@@ -26,7 +26,7 @@ case "$REPLY" in
 1) echo "Show current TACACS+ configuration: "
 	echo ""
 	declare -A PORTEX_CONF
-	CONFIG_READ $PORTEX_SYS TAC_
+	CONFIG_READ $PORTEX_TS_CONF TAC_
 	echo -e "Current TACACS+ function: ${PORTEX_CONF[TAC_ENABLE]}"
 	echo -e "Current TACACS+ server1 IP/Key pair: ${PORTEX_CONF[TAC_SERVER1_IP]}/${PORTEX_CONF[TAC_SERVER1_KEY]}"
 	echo -e "Current TACACS+ server2 IP/Key pair: ${PORTEX_CONF[TAC_SERVER2_IP]}/${PORTEX_CONF[TAC_SERVER2_KEY]}"
@@ -35,7 +35,7 @@ case "$REPLY" in
 2) echo "Configure TACACS+ server1: "
 	echo ""
 	declare -A PORTEX_CONF
-	CONFIG_READ $PORTEX_SYS TAC_
+	CONFIG_READ $PORTEX_TS_CONF TAC_
 
 	echo -e "Current TACACS+ server1 IP address: ${PORTEX_CONF[TAC_SERVER1_IP]}"
 	echo -e "Current TACACS+ server1 tacacs key: ${PORTEX_CONF[TAC_SERVER1_KEY]}\n"
@@ -59,7 +59,7 @@ case "$REPLY" in
 3) echo "Configure TACACS+ server2: "
         echo ""
         declare -A PORTEX_CONF
-        CONFIG_READ $PORTEX_SYS TAC_
+        CONFIG_READ $PORTEX_TS_CONF TAC_
 
         echo -e "Current TACACS+ server2 IP address: ${PORTEX_CONF[TAC_SERVER2_IP]}"
         echo -e "Current TACACS+ server2 tacacs key: ${PORTEX_CONF[TAC_SERVER2_KEY]}\n"
@@ -83,7 +83,7 @@ case "$REPLY" in
 4) echo "Enable or Disable TACACS+ function: "
 	echo ""
 	declare -A PORTEX_CONF
-	CONFIG_READ $PORTEX_SYS TAC_
+	CONFIG_READ $PORTEX_TS_CONF TAC_
 
 	echo -e "Current TACACS+ function is ${PORTEX_CONF[TAC_ENABLE]}."
 	case ${PORTEX_CONF[TAC_ENABLE]} in

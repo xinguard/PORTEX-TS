@@ -7,11 +7,11 @@ source /usr/local/bin/passwdmgmt
 source /usr/local/bin/configmgmt
 
 SSH_SOURCE=`echo $SSH_CONNECTION | awk '{print $1}'`
-PORTEX_SYS="/home/portex/portex_ts.conf"
+PORTEX_TS_CONF="/home/portex/portex_ts.conf"
 
 declare -A PORTEX_CONF
-CONFIG_READ $PORTEX_SYS TAC_
-CONFIG_READ $PORTEX_SYS LOG_
+CONFIG_READ $PORTEX_TS_CONF TAC_
+CONFIG_READ $PORTEX_TS_CONF LOG_
 
 declare -x TAC_ENABLE=${PORTEX_CONF[TAC_ENABLE]}
 declare -x TAC_SERVER_FLAG=""
@@ -134,11 +134,11 @@ while [ TRUE ]; do
 	
 	echo ""
 
-	cat $PORTEX_SYS | egrep -v '#' | egrep "^$LOCAL_USERID:localuser:" >/dev/null 2>&1
+	cat $PORTEX_TS_CONF | egrep -v '#' | egrep "^$LOCAL_USERID:localuser:" >/dev/null 2>&1
 	if [ $? -eq 0 ]; then
-		LOCAL_ACCT_NAME=`cat $PORTEX_SYS | egrep -v '#' | egrep "^$LOCAL_USERID:localuser:" | awk -F: '{print $1}'`
-		LOCAL_ACCT_PRIVILEGE=`cat $PORTEX_SYS | egrep -v '#' | egrep "^$LOCAL_USERID:localuser:" | awk -F: '{print $3}'`
-		LOCAL_ACCT_CRYPT=`cat $PORTEX_SYS | egrep -v '#' | egrep "^$LOCAL_USERID:localuser:" | awk -F: '{print $4}'`
+		LOCAL_ACCT_NAME=`cat $PORTEX_TS_CONF | egrep -v '#' | egrep "^$LOCAL_USERID:localuser:" | awk -F: '{print $1}'`
+		LOCAL_ACCT_PRIVILEGE=`cat $PORTEX_TS_CONF | egrep -v '#' | egrep "^$LOCAL_USERID:localuser:" | awk -F: '{print $3}'`
+		LOCAL_ACCT_CRYPT=`cat $PORTEX_TS_CONF | egrep -v '#' | egrep "^$LOCAL_USERID:localuser:" | awk -F: '{print $4}'`
 		PASS_CHECK -c $LOCAL_USERPASS:$LOCAL_ACCT_CRYPT
 		if [ $? -eq 0 ]; then
 			export PORTEX_USERID=$LOCAL_ACCT_NAME

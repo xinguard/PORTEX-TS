@@ -2,13 +2,13 @@
 
 source /usr/local/bin/writelog
 source /usr/local/bin/configmgmt
-PORTEX_SYS="/home/portex/portex_ts.conf"
+PORTEX_TS_CONF="/home/portex/portex_ts.conf"
 
 VERBOSE_FLAG=OFF
 declare -A PORTEX_CONF
-CONFIG_READ $PORTEX_SYS TAC_
-CONFIG_READ $PORTEX_SYS LOG_
-CONFIG_READ $PORTEX_SYS NTP_
+CONFIG_READ $PORTEX_TS_CONF TAC_
+CONFIG_READ $PORTEX_TS_CONF LOG_
+CONFIG_READ $PORTEX_TS_CONF NTP_
 echo ${PORTEX_CONF[LOG_ENABLE]}
 
 /bin/nc -vz -w 3 ${PORTEX_CONF[TAC_SERVER1_IP]} 49 &>/dev/null 2>&1

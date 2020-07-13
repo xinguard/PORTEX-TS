@@ -4,7 +4,7 @@
 #
 source /usr/local/bin/configmgmt
 
-PORTEX_SYS="/home/portex/portex_ts.conf"
+PORTEX_TS_CONF="/home/portex/portex_ts.conf"
 
 
 prompt="Select function options: "
@@ -24,7 +24,7 @@ case "$REPLY" in
 1) echo "Show NTP server configuration: "
 	echo ""
 	declare -A PORTEX_CONF
-	CONFIG_READ $PORTEX_SYS NTP_
+	CONFIG_READ $PORTEX_TS_CONF NTP_
 	echo -e "Current NTP function: ${PORTEX_CONF[NTP_ENABLE]}"
 	echo -e "Current NTP server1: ${PORTEX_CONF[NTP_SERVER1]}" 
 	echo -e "Current NTP server2: ${PORTEX_CONF[NTP_SERVER2]}"
@@ -34,7 +34,7 @@ case "$REPLY" in
 2) echo "Configure NTP server1: "
 	echo ""
 	declare -A PORTEX_CONF
-	CONFIG_READ $PORTEX_SYS NTP_
+	CONFIG_READ $PORTEX_TS_CONF NTP_
 
 	echo -e "Current NTP server1: ${PORTEX_CONF[NTP_SERVER1]}"
 	echo ""
@@ -55,7 +55,7 @@ case "$REPLY" in
 3) echo "Configure NTP server2: "
         echo ""
         declare -A PORTEX_CONF
-        CONFIG_READ $PORTEX_SYS NTP_
+        CONFIG_READ $PORTEX_TS_CONF NTP_
 
         echo -e "Current NTP server2: ${PORTEX_CONF[NTP_SERVER2]}"
         echo ""
@@ -76,7 +76,7 @@ case "$REPLY" in
 4) echo "Enable or Disable NTP function: "
 	echo ""
 	declare -A PORTEX_CONF
-	CONFIG_READ $PORTEX_SYS NTP_
+	CONFIG_READ $PORTEX_TS_CONF NTP_
 
 	echo -e "Current NTP function is ${PORTEX_CONF[NTP_ENABLE]}."
 	case ${PORTEX_CONF[NTP_ENABLE]} in
@@ -116,7 +116,7 @@ case "$REPLY" in
 5) echo "Test NTP server."
 	echo ""
 	declare -A PORTEX_CONF
-	CONFIG_READ $PORTEX_SYS NTP_
+	CONFIG_READ $PORTEX_TS_CONF NTP_
 	if [ -n $PORTEX_CONF[NTP_SERVER1]} ]; then
 		ping -c 1 ${PORTEX_CONF[NTP_SERVER1]} >/dev/null 2>&1
 		if [ $? -eq 0 ]; then

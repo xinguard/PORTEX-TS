@@ -4,7 +4,7 @@
 #
 source /usr/local/bin/configmgmt
 
-PORTEX_SYS="/home/portex/portex_ts.conf"
+PORTEX_TS_CONF="/home/portex/portex_ts.conf"
 
 
 prompt="Select function options: "
@@ -24,7 +24,7 @@ case "$REPLY" in
 1) echo "Show SYSLOG configuration: "
 	echo ""
 	declare -A PORTEX_CONF
-	CONFIG_READ $PORTEX_SYS LOG_
+	CONFIG_READ $PORTEX_TS_CONF LOG_
 	echo -e "Current SYSLOG function: ${PORTEX_CONF[LOG_ENABLE]}"
 	echo -e "Current SYSLOG server1 IP address: ${PORTEX_CONF[LOG_SERVER1_IP]}" 
 	echo -e "Current SYSLOG server2 IP address: ${PORTEX_CONF[LOG_SERVER2_IP]}"
@@ -34,7 +34,7 @@ case "$REPLY" in
 2) echo "Configure SYSLOG server1: "
 	echo ""
 	declare -A PORTEX_CONF
-	CONFIG_READ $PORTEX_SYS LOG_
+	CONFIG_READ $PORTEX_TS_CONF LOG_
 
 	echo -e "Current SYSLOG server1 IP address: ${PORTEX_CONF[LOG_SERVER1_IP]}"
 	echo ""
@@ -55,7 +55,7 @@ case "$REPLY" in
 3) echo "Configure SYSLOG server2: "
         echo ""
         declare -A PORTEX_CONF
-        CONFIG_READ $PORTEX_SYS LOG_
+        CONFIG_READ $PORTEX_TS_CONF LOG_
 
         echo -e "Current SYSLOG server2 IP address: ${PORTEX_CONF[LOG_SERVER2_IP]}"
         echo ""
@@ -76,7 +76,7 @@ case "$REPLY" in
 4) echo "Enable or Disable SYSLOG function: "
 	echo ""
 	declare -A PORTEX_CONF
-	CONFIG_READ $PORTEX_SYS LOG_
+	CONFIG_READ $PORTEX_TS_CONF LOG_
 
 	echo -e "Current SYSLOG function is ${PORTEX_CONF[LOG_ENABLE]}."
 	case ${PORTEX_CONF[LOG_ENABLE]} in
@@ -116,7 +116,7 @@ case "$REPLY" in
 5) echo "Test SYSLOG server."
 	echo ""
 	declare -A PORTEX_CONF
-	CONFIG_READ $PORTEX_SYS LOG_
+	CONFIG_READ $PORTEX_TS_CONF LOG_
 	if [ -n $PORTEX_CONF[LOG_SERVER1_IP]} ]; then
 		ping -c 1 ${PORTEX_CONF[LOG_SERVER1_IP]} >/dev/null 2>&1
 		if [ $? -eq 0 ]; then

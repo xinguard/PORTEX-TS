@@ -10,14 +10,14 @@ ps auxf | egrep -w $PROG_NAME | egrep -v "grep|$PPID|$$" >/dev/null 2>&1
 source /usr/local/bin/configmgmt
 
 LOG_BUFFER="/dev/shm/log_buffer"
-PORTEX_SYS="/home/portex/portex_ts.conf"
+PORTEX_TS_CONF="/home/portex/portex_ts.conf"
 
 #
 # Initial variables
 declare VERBOSE_FLAG=OFF
 declare -A PORTEX_CONF
 
-CONFIG_READ $PORTEX_SYS LOG_
+CONFIG_READ $PORTEX_TS_CONF LOG_
 declare -i PROG_PERIOD=${PORTEX_CONF[LOG_PERIOD]}
 
 #
@@ -55,7 +55,7 @@ if [ -s $LOG_BUFFER ]; then		# Execute when log buffer is not empty
 [ $VERBOSE_FLAG == "ON" ] && echo "New message(s) in log buffer, try to send log."
 unset PORTEX_CONF
 declare -A PORTEX_CONF=""
-CONFIG_READ $PORTEX_SYS LOG_
+CONFIG_READ $PORTEX_TS_CONF LOG_
 
 #
 # Check log server status

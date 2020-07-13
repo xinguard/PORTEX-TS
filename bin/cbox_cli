@@ -14,6 +14,7 @@ options=("Ethernet management"
 )
 
 echo ""
+echo ""
 PS3="$prompt "
 select opt in "${options[@]}" "Quit"; do
 	case "$REPLY" in

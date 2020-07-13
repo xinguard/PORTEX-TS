@@ -7,9 +7,9 @@ export PATH=/sbin:${PATH}
 
 source /usr/local/bin/configmgmt
 
-PORTEX_SYS="/home/portex/portex_ts.conf"
+PORTEX_TS_CONF="/home/portex/portex_ts.conf"
 declare -A PORTEX_CONF
-CONFIG_READ $PORTEX_SYS TMUX_
+CONFIG_READ $PORTEX_TS_CONF TMUX_
 
 PROG_NAME=tacattach
 

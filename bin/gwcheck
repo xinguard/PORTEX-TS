@@ -4,11 +4,11 @@
 #
 source /usr/local/bin/writelog
 source /usr/local/bin/configmgmt
-PORTEX_SYS="/home/portex/portex_ts.conf"
+PORTEX_TS_CONF="/home/portex/portex_ts.conf"
 
-trap "CONFIG_READ $PORTEX_SYS RCHK_" SIGHUP
+trap "CONFIG_READ $PORTEX_TS_CONF RCHK_" SIGHUP
 
-CONFIG_READ $PORTEX_SYS RCHK_
+CONFIG_READ $PORTEX_TS_CONF RCHK_
 
 if [ -z "$1" ];then
         declare PERIOD=${PORTEX_CONF[RCHK_GATEWAY]}
