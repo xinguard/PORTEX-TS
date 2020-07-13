@@ -4,8 +4,7 @@
 #
 
 # Install programs to /usr/local/bin
-for file in `ls bin`
-do
+for file in $(ls bin); do
     cp bin/$file /usr/local/bin
 done
 
@@ -17,7 +16,7 @@ cp etc/portex /etc/sudoers.d
 chmod 440 /etc/sudoers.d/portex
 
 # Install configuration files for portex
-[ ! -f ~portex/portex_sys.conf ] && su -s /bin/bash portex -c "cp etc/portex_sys.conf ~portex"
+[ ! -f ~portex/portex_ts.conf ] && su -s /bin/bash portex -c "cp etc/portex_ts.conf ~portex"
 su -s /bin/bash portex -c "cp etc/.tmux.conf ~portex"
 
 # Modify sshd configuration for no password login
@@ -25,9 +24,3 @@ sed -i 's/^#PermitEmptyPasswords no/PermitEmptyPasswords yes/' /etc/ssh/sshd_con
 sed -i 's/^UsePAM yes/UsePAM no/' /etc/ssh/sshd_config
 passwd -d portex
 service ssh reload
-
-
-
-
-
-
