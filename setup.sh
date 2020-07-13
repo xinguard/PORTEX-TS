@@ -12,8 +12,8 @@ done
 cp etc/90-usb-serial.rules /etc/udev/rules.d
 cp etc/led-daemon /etc/init.d
 cp etc/pwr-and-control-button-monitor /etc/init.d
-cp etc/portex /etc/sudoers.d
-chmod 440 /etc/sudoers.d/portex
+cp etc/portex_ts /etc/sudoers.d
+chmod 440 /etc/sudoers.d/portex_ts
 
 # Install configuration files for portex
 [ ! -f ~portex/portex_ts.conf ] && su -s /bin/bash portex -c "cp etc/portex_ts.conf ~portex"
