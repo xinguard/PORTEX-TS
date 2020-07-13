@@ -24,7 +24,7 @@ $ sudo /bin/bash setup.sh
 ### System service register
 $ sudo update-rc.d led-daemon defaults  
 $ sudo update-rc.d pwr-and-control-button-monitor defaults  
-$ sudo sed -i '19a/usr/local/bin/portex-ts.init' /etc/rc.local  
+$ sudo sed -i '19a/usr/local/bin/portex.init\n' /etc/rc.local  
   
 ### Cron table setup for watchdog
 $ sudo crontab -e  
