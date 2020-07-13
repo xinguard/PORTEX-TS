@@ -7,7 +7,7 @@ source /usr/local/bin/passwdmgmt
 source /usr/local/bin/configmgmt
 
 SSH_SOURCE=`echo $SSH_CONNECTION | awk '{print $1}'`
-PORTEX_SYS="/home/portex/portex_sys.conf"
+PORTEX_SYS="/home/portex/portex_ts.conf"
 
 declare -A PORTEX_CONF
 CONFIG_READ $PORTEX_SYS TAC_

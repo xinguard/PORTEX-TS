@@ -2,7 +2,7 @@
 
 source /usr/local/bin/writelog
 source /usr/local/bin/configmgmt
-PORTEX_SYS="/home/portex/portex_sys.conf"
+PORTEX_SYS="/home/portex/portex_ts.conf"
 
 VERBOSE_FLAG=OFF
 declare -A PORTEX_CONF

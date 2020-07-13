@@ -7,7 +7,7 @@
 source /usr/local/bin/passwdmgmt
 source /usr/local/bin/configmgmt
 source /usr/local/bin/writelog
-PORTEX_SYS="/home/portex/portex_sys.conf"
+PORTEX_SYS="/home/portex/portex_ts.conf"
 
 function acct_check(){
     LOCALACCT=$1

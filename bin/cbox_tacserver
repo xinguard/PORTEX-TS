@@ -5,7 +5,7 @@
 
 source /usr/local/bin/configmgmt
 
-PORTEX_SYS="/home/portex/portex_sys.conf"
+PORTEX_SYS="/home/portex/portex_ts.conf"
 
 
 prompt="Select function options: "
