@@ -18,7 +18,7 @@ function acct_check() {
 }
 
 while true; do
-	echo "Change local account password: "
+	echo "Change local account $PORTEX_USERID password: "
 	echo ""
 	declare ACCT_NAME="$PORTEX_USERID"
 
@@ -40,13 +40,13 @@ while true; do
 	NEWPASS_CHECK $PWD_INPUT $PWD_INPUT2
 	case $? in
 	0)
-		echo "God job!"
 		ACCT_PRIV=$(cat $PORTEX_TS_CONF | egrep "^$ACCT_NAME" | awk -F: '{print $3}')
 		PWD_SALT=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 8)
 		OUTPUT_CRYPT=$(mkpasswd --method=SHA-512 -S $PWD_SALT $PWD_INPUT)
 		echo $LOCAL_ACCT_NAME:localuser:$LOCAL_ACCT_PRIVILEGE:$OUTPUT_CRYPT
 		CONFIG_CHANGE -d $ACCT_NAME:localuser:
 		CONFIG_CHANGE -a $ACCT_NAME:localuser:$ACCT_PRIV:$OUTPUT_CRYPT
+		echo "God job!"
 		;;
 	1)
 		NEWPASS_NOTIFY
