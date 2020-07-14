@@ -98,7 +98,7 @@ while true; do
         /usr/local/bin/tacattach
         ;;
     "Change Pass")
-        /usr/local/bin/cbox_chpasswd
+        /usr/local/bin/cbox_chpasswdop
         ;;
     Exit)
         tac_accounting stop $PROG_NAME
