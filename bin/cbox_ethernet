@@ -1,9 +1,7 @@
 #!/bin/bash
-
 #
 # Configured script to set Ethernet and WiFi configuration
 #
-
 DHCP_CONF=/etc/dhcpcd.conf
 
 prompt="Select function options: "
