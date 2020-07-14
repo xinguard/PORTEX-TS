@@ -63,7 +63,8 @@ function NEWPASS_CHECK() {
 function OLDPASS_CHECK() {
 	INPUT_PASSWD="$1"
 	INPUT_CRYPT="$2"
-	INPUT_SALT=$(echo $INPUT_CRYPT | awk -F$ '{print $3}')
+#	INPUT_SALT=$(echo $INPUT_CRYPT | awk -F$ '{print $3}')
+	INPUT_SALT=`echo $INPUT_CRYPT | awk -F$ '{print $3}'`
 	OUTPUT_CRYPT=$(/usr/bin/mkpasswd --method=SHA-512 -S $INPUT_SALT $INPUT_PASSWD)
 	if [ $INPUT_CRYPT == $OUTPUT_CRYPT ]; then
 		return 0
