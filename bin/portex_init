@@ -1,7 +1,7 @@
 #! /bin/bash
 #
 #
-# iptab;e initial
+# iptable initial
 /usr/local/bin/concontrol
 
 # Log initial
