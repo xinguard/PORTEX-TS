@@ -3,70 +3,72 @@
 # Routine for configuration manegement
 #
 
-function CONFIG_CHANGE(){
+function CONFIG_CHANGE() {
 	CONF_FILE="/home/portex/portex_ts.conf"
-
 	local OPTIND OPT m d a p
 	while getopts ":m:d:a:p:" OPT; do
 		case $OPT in
-			m)	# Usage: -m KEY_NAME=KEY_VALUE
-				#echo "Modify " $OPTARG
-				INPUT_KEY=`echo $OPTARG | awk -F= '{print $1}'`
-				INPUT_VAL=$OPTARG
-				#echo $INPUT_KEY $INPUT_VAL
-				#cat $CONF_FILE | egrep -v '#' | egrep $INPUT_KEY >/dev/null 2>&1
-				sed -i "s/^$INPUT_KEY=.*$/$INPUT_VAL/" $CONF_FILE
+		m) # Usage: -m KEY_NAME=KEY_VALUE
+			#echo "Modify " $OPTARG
+			INPUT_KEY=$(echo $OPTARG | awk -F= '{print $1}')
+			INPUT_VAL=$OPTARG
+			#echo $INPUT_KEY $INPUT_VAL
+			#cat $CONF_FILE | egrep -v '#' | egrep $INPUT_KEY >/dev/null 2>&1
+			sed -i "s/^$INPUT_KEY=.*$/$INPUT_VAL/" $CONF_FILE
+			;;
+		d) # Usage: -d ACL_IN=A.B.C.D/E or -d LOCAL_ACCT:localuser:
+			#				echo "Delete " $OPTARG
+			INPUT_VAL=$OPTARG
+			echo $INPUT_VAL | egrep 'ACL_IN' >/dev/null 2>&1
+			[ $? -eq 0 ] && ARG_TYPE=ACL
+			echo $INPUT_VAL | egrep ':localuser:' >/dev/null 2>&1
+			[ $? -eq 0 ] && ARG_TYPE=ACCT
+			case $ARG_TYPE in
+			ACL)
+				echo "$INPUT_VAL is ACL type."
+				sed -i "\|^$INPUT_VAL|d" $CONF_FILE
 				;;
-			d)	# Usage: -d ACL_IN=A.B.C.D/E or -d LOCAL_ACCT:localuser:
-#				echo "Delete " $OPTARG
-				INPUT_VAL=$OPTARG
-				echo $INPUT_VAL | egrep 'ACL_IN' >/dev/null 2>&1; [ $? -eq 0 ] && ARG_TYPE=ACL
-				echo $INPUT_VAL | egrep ':localuser:' >/dev/null 2>&1; [ $? -eq 0 ] && ARG_TYPE=ACCT
-				case $ARG_TYPE in
-					ACL)
-						echo "$INPUT_VAL is ACL type."
-						sed -i "\|^$INPUT_VAL|d" $CONF_FILE
-						;;
-					ACCT)
-						echo "$INPUT_VAL is ACCT type"
-						sed -i "\|^$INPUT_VAL|d" $CONF_FILE
-						;;
-				esac
+			ACCT)
+				echo "$INPUT_VAL is ACCT type"
+				sed -i "\|^$INPUT_VAL|d" $CONF_FILE
 				;;
-			a)	# Usage: -a ACL_IN=A.B.C.D/E or -a ACCOUNT_NAME:localuser:ACCOUNT_PRIVILEGE:ACCOUNT_PASSWORD
-#				echo "Add " $OPTARG
-				INPUT_VAL=$OPTARG
-				echo $INPUT_VAL | egrep 'ACL_IN' >/dev/null 2>&1; [ $? -eq 0 ] && ARG_TYPE=ACL
-				echo $INPUT_VAL | egrep ':localuser:' >/dev/null 2>&1; [ $? -eq 0 ] && ARG_TYPE=ACCT
-				case $ARG_TYPE in
-					ACL)
-						echo "$INPUT_VAL is ACL type."
-						cat $CONF_FILE | egrep $INPUT_VAL >/dev/null 2>&1
-						[ $? -eq 0 ] || sed -i "/# ACL entries begin/ a $INPUT_VAL" $CONF_FILE
-						;;
-					ACCT)
-						echo "$INPUT_VAL is ACCT type."
-						sed -i "/# Local account entries begin/ a $INPUT_VAL" $CONF_FILE
-						;;
-				esac
+			esac
+			;;
+		a) # Usage: -a ACL_IN=A.B.C.D/E or -a ACCOUNT_NAME:localuser:ACCOUNT_PRIVILEGE:ACCOUNT_PASSWORD
+			#				echo "Add " $OPTARG
+			INPUT_VAL=$OPTARG
+			echo $INPUT_VAL | egrep 'ACL_IN' >/dev/null 2>&1
+			[ $? -eq 0 ] && ARG_TYPE=ACL
+			echo $INPUT_VAL | egrep ':localuser:' >/dev/null 2>&1
+			[ $? -eq 0 ] && ARG_TYPE=ACCT
+			case $ARG_TYPE in
+			ACL)
+				echo "$INPUT_VAL is ACL type."
+				cat $CONF_FILE | egrep $INPUT_VAL >/dev/null 2>&1
+				[ $? -eq 0 ] || sed -i "/# ACL entries begin/ a $INPUT_VAL" $CONF_FILE
 				;;
-			p)	# Usage -p ACCOUNT_NAME:localuser:ACCOUNT_PRIVILEGE:ACCOUNT_PASSWORD
-#				echo "Change password"
-				INPUT_VAL=$OPTARG
-				ACCT_NAME=`echo $INPUT_VAL | awk -F: '{print $1}'`
-				sed -i "\|^$ACCT_NAME|d" $CONF_FILE
+			ACCT)
+				echo "$INPUT_VAL is ACCT type."
 				sed -i "/# Local account entries begin/ a $INPUT_VAL" $CONF_FILE
 				;;
-			:)
-				echo "Invalid argument."
-				;;
-			*)
-				echo "Invalid option."
-				;;
+			esac
+			;;
+		p) # Usage -p ACCOUNT_NAME:localuser:ACCOUNT_PRIVILEGE:ACCOUNT_PASSWORD
+			#				echo "Change password"
+			INPUT_VAL=$OPTARG
+			ACCT_NAME=$(echo $INPUT_VAL | awk -F: '{print $1}')
+			sed -i "\|^$ACCT_NAME|d" $CONF_FILE
+			sed -i "/# Local account entries begin/ a $INPUT_VAL" $CONF_FILE
+			;;
+		:)
+			echo "Invalid argument."
+			;;
+		*)
+			echo "Invalid option."
+			;;
 		esac
 	done
 }
-
 
 #function importconf(){
 #        CONF_FILE=$1
@@ -86,20 +88,20 @@ function CONFIG_CHANGE(){
 #        fi
 #}
 
-function CONFIG_READ(){
-        CONF_FILE=$1
-        CONF_KEY=$2
-        if [ -n $CONF_KEY ]; then
-                for ITEM in `cat $CONF_FILE | egrep -v '#' | egrep $CONF_KEY`; do
-                        KEY=`echo $ITEM | awk -F= '{print $1}'`
-                        VALUE=`echo $ITEM | awk -F= '{print $2}'`
-                        PORTEX_CONF[$KEY]=$VALUE
-                done
-        else
-                for ITEM in `cat $CONF_FILE | egrep -v '#'`; do
-                        KEY=`echo $ITEM | awk -F= '{print $1}'`
-                        VALUE=`echo $ITEM | awk -F= '{print $2}'`
-                        PORTEX_CONF[$KEY]=$VALUE
-                done
-        fi
+function CONFIG_READ() {
+	CONF_FILE=$1
+	CONF_KEY=$2
+	if [ -n $CONF_KEY ]; then
+		for ITEM in $(cat $CONF_FILE | egrep -v '#' | egrep $CONF_KEY); do
+			KEY=$(echo $ITEM | awk -F= '{print $1}')
+			VALUE=$(echo $ITEM | awk -F= '{print $2}')
+			PORTEX_CONF[$KEY]=$VALUE
+		done
+	else
+		for ITEM in $(cat $CONF_FILE | egrep -v '#'); do
+			KEY=$(echo $ITEM | awk -F= '{print $1}')
+			VALUE=$(echo $ITEM | awk -F= '{print $2}')
+			PORTEX_CONF[$KEY]=$VALUE
+		done
+	fi
 }

@@ -1,5 +1,6 @@
 #!/bin/bash
-
+#
+#
 source /usr/local/bin/writelog
 source /usr/local/bin/configmgmt
 PORTEX_TS_CONF="/home/portex/portex_ts.conf"
@@ -21,7 +22,7 @@ else
 fi
 
 /bin/nc -vz -w 3 ${PORTEX_CONF[TAC_SERVER2_IP]} 49 &>/dev/null 2>&1
-if [ $? -eq 0 ] ; then
+if [ $? -eq 0 ]; then
 	TAC_SERVER2_STATUS="OK"
 	[ $VERBOSE_FLAG == "ON" ] && echo "Connect TACACS+ Server2(${PORTEX_CONF[TAC_SERVER2_IP]}) is available."
 else
@@ -31,10 +32,10 @@ fi
 
 /usr/sbin/ntpdate ${PORTEX_CONF[NTP_SERVER1]} &>/dev/null 2>&1
 if [ $? -eq 0 ]; then
-        NTP_STATUS="ntp sync"
+	NTP_STATUS="ntp sync"
 else
-        echo NTP_SERVER1_STATUS="FAILED"
-        /usr/sbin/ntpdate ${PORTEX_CONF[NTP_SERVER2]} &>/dev/null 2>&1
+	echo NTP_SERVER1_STATUS="FAILED"
+	/usr/sbin/ntpdate ${PORTEX_CONF[NTP_SERVER2]} &>/dev/null 2>&1
 	if [ $? -eq 0 ]; then
 		NTP_STATUS="ntp sync"
 	else
@@ -42,10 +43,9 @@ else
 	fi
 fi
 
-SYSTEM_BOOTTIME=`uptime -s`
-SYSTEM_UPTIME=`uptime -p`
+SYSTEM_BOOTTIME=$(uptime -s)
+SYSTEM_UPTIME=$(uptime -p)
 
 [ ${PORTEX_CONF[LOG_ENABLE]} == "ON" ] && write_log_buffer auth info TACACS \
 	"TAC_SERVER1(${PORTEX_CONF[TAC_SERVER1_IP]})=$TAC_SERVER1_STATUS, TAC_SERVER2(${PORTEX_CONF[TAC_SERVER2_IP]}); \
 	System $SYSTEM_UPTIME since $SYSTEM_BOOTTIME ($NTP_STATUS)"
-

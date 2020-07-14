@@ -2,7 +2,7 @@
 #
 #Revision:2018101601
 #
-
+#
 export PATH=/sbin:${PATH}
 
 source /usr/local/bin/configmgmt
@@ -23,8 +23,8 @@ trap "rm $OUTPUT; rm $INPUT; exit" SIGHUP SIGINT SIGTERM
 # TACACS+ Accounting
 #
 TAC_CLIENT=/usr/local/bin/tacacs_client
-function tac_accounting(){
-        $TAC_CLIENT -u $TAC_USERID -H $TAC_SERVER -k $TAC_KEY account -f $1 -c service=portex-tacmenu cmd=$2 cmdarg="$3 $4 $5 $6 $7" &>/dev/null 2>&1
+function tac_accounting() {
+    $TAC_CLIENT -u $TAC_USERID -H $TAC_SERVER -k $TAC_KEY account -f $1 -c service=portex-tacmenu cmd=$2 cmdarg="$3 $4 $5 $6 $7" &>/dev/null 2>&1
 }
 tac_accounting start $PROG_NAME
 
@@ -34,76 +34,68 @@ tac_accounting start $PROG_NAME
 #  $2 -> set msgbox width
 #  $3 -> set msgbox title
 #
-function display_output(){
-    local h=${1-10}        # box height default 10
-    local w=${2-41}        # box width default 41
-    local t=${3-Output}    # box title
+function display_output() {
+    local h=${1-10}     # box height default 10
+    local w=${2-41}     # box width default 41
+    local t=${3-Output} # box title
     dialog --backtitle "SS Menu Output" --title "${t}" --clear --msgbox "$(<$OUTPUT)" ${h} ${w}
 }
 #
 # Purpose - display a system info
 #
-function show_attached_session(){
-#    screen -list | egrep "Shell|CON" | awk '{print $1}' > $OUTPUT
-    tmux ls | awk '{print $1}' > $OUTPUT
+function show_attached_session() {
+    #    screen -list | egrep "Shell|CON" | awk '{print $1}' > $OUTPUT
+    tmux ls | awk '{print $1}' >$OUTPUT
     display_output 20 80 "Current attached session(es)"
 }
 #
 # set infinite loop
 #
-while true
-do
-#    screen -list | egrep "Shell|CON" | awk '{print $1}' | awk '{print $1,"attach_to_"$1}' > $OUTPUT
-    tmux ls | awk '{print $1}' | awk '{print $1, "attach_to_"$1}' > $OUTPUT
-
+while true; do
+    #    screen -list | egrep "Shell|CON" | awk '{print $1}' | awk '{print $1,"attach_to_"$1}' > $OUTPUT
+    tmux ls | awk '{print $1}' | awk '{print $1, "attach_to_"$1}' >$OUTPUT
     ### display main menu ###
-    dialog --clear  --help-button --backtitle "MCSC SS ATTACHED SESSION(ES)" \
-    --title "[ ATTACHED SESSION(ES) - CONSOLE ]" \
-    --timeout 300 \
-    --menu "Choose the TASK" 16 64 12 \
+    dialog --clear --help-button --backtitle "MCSC SS ATTACHED SESSION(ES)" \
+        --title "[ ATTACHED SESSION(ES) - CONSOLE ]" \
+        --timeout 300 \
+        --menu "Choose the TASK" 16 64 12 \
         "Attached" "Displays Attached Session(es)" \
         $(<"${OUTPUT}") \
         Exit "Exit to Main Menu" 2>"${INPUT}"
-
-        _status=$?
-        if [ ${_status} -eq 255 ]
-        then
-            # dialog timeout
-            exit 0
-        fi
-
+    _status=$?
+    if [ ${_status} -eq 255 ]; then
+        # dialog timeout
+        exit 0
+    fi
     menuitem=$(<"${INPUT}")
-
     # make decsion
     case $menuitem in
-        "Exit")
-		tac_accounting stop $PROG_NAME
-		# if temp files found, delete em
-		[ -f $OUTPUT ] && rm $OUTPUT
-		[ -f $INPUT ] && rm $INPUT
-		exit 0
-		;;
-        "Attached")
-		tac_accounting start $PROG_NAME show_attached_session
-		show_attached_session
-		tac_accounting stop $PROG_NAME show_attached_session
-		;;
-        *)
-		tac_accounting start $PROG_NAME attach ${menuitem}
-		SESSION_ID=`echo ${menuitem} | awk -F- '{print $2}'`
-		if [ $SESSION_ID == $PORTEX_USERID ]; then
-			tmux attach -t ${menuitem}
-		else
-#		screen -wipe; screen -x ${menuitem} -s /bin/bash
-			if [ ${PORTEX_CONF[TMUX_SHARE]} == "RW" ]; then
-				tmux attach -t ${menuitem}
-			else
-				tmux attach -r -t ${menuitem}
-			fi
-		fi
-		tac_accounting stop $PROG_NAME attach ${menuitem}
-		;;
+    "Exit")
+        tac_accounting stop $PROG_NAME
+        # if temp files found, delete em
+        [ -f $OUTPUT ] && rm $OUTPUT
+        [ -f $INPUT ] && rm $INPUT
+        exit 0
+        ;;
+    "Attached")
+        tac_accounting start $PROG_NAME show_attached_session
+        show_attached_session
+        tac_accounting stop $PROG_NAME show_attached_session
+        ;;
+    *)
+        tac_accounting start $PROG_NAME attach ${menuitem}
+        SESSION_ID=$(echo ${menuitem} | awk -F- '{print $2}')
+        if [ $SESSION_ID == $PORTEX_USERID ]; then
+            tmux attach -t ${menuitem}
+        else
+            #		screen -wipe; screen -x ${menuitem} -s /bin/bash
+            if [ ${PORTEX_CONF[TMUX_SHARE]} == "RW" ]; then
+                tmux attach -t ${menuitem}
+            else
+                tmux attach -r -t ${menuitem}
+            fi
+        fi
+        tac_accounting stop $PROG_NAME attach ${menuitem}
+        ;;
     esac
-
 done
-

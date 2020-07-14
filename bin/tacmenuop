@@ -1,10 +1,7 @@
 #!/bin/bash
 #
-#Revision:2018110701
+#Revision:20200619
 #
-
-REV="20200619"
-
 export PATH=/sbin:${PATH}
 
 PROG_NAME=tacmenuop
@@ -65,7 +62,6 @@ function show_sysinfo() {
 # set infinite loop
 #
 while true; do
-
     ### display main menu ###
     dialog --clear --help-button --backtitle "MCSC SS rev:${REV} HOSTNAME: $HOSTNAME" \
         --timeout 1800 \
@@ -113,5 +109,4 @@ while true; do
         break
         ;;
     esac
-
 done

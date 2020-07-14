@@ -5,9 +5,8 @@ PORTEX_TS_CONF="/home/portex/portex_ts.conf"
 
 $IPTABLES -F
 
-for IP_ADDRESS in `/bin/cat $PORTEX_TS_CONF | /bin/egrep -v '#' | egrep ACL_IN | awk -F= '{print $2}'`
-do
-$IPTABLES -A INPUT -p tcp -s "$IP_ADDRESS" --dport 22 -j ACCEPT
+for IP_ADDRESS in $(/bin/cat $PORTEX_TS_CONF | /bin/egrep -v '#' | egrep ACL_IN | awk -F= '{print $2}'); do
+	$IPTABLES -A INPUT -p tcp -s "$IP_ADDRESS" --dport 22 -j ACCEPT
 done
 
 if [ -z "$IP_ADDRESS" ]; then

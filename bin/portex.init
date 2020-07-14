@@ -15,8 +15,8 @@ echo -e "red_on\c" | sudo nc -q 1 -U /var/run/uds_led
 sleep 3
 
 # Start regular check
-/usr/local/bin/gwcheck > /dev/null &
-/usr/local/bin/tscheck > /dev/null &
+/usr/local/bin/gwcheck >/dev/null &
+/usr/local/bin/tscheck >/dev/null &
 
 # Put LED to normal status
 echo -e "green_on\c" | sudo nc -q 1 -U /var/run/uds_led

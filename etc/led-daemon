@@ -12,38 +12,37 @@
 ### END INIT INFO
 
 case "$1" in
-  start)
-    echo "Starting led-daemon"
-    /usr/local/bin/led_listen.py >/dev/null &
-    ;;
-  stop)
-    echo "Stopping led-daemon"
-    PID=`ps ax | grep led_listen | grep -v grep | awk '{print $1}'`
-    if [ $PID ]; then
-      kill -HUP $PID
-    fi
-    ;;
-  restart)
-    echo "Restart led-daemon"
-    PID=`ps ax | grep led_listen | grep -v grep | awk '{print $1}'`
-    if [ $PID ]; then
-      kill -HUP $PID
-    fi
-    /usr/local/bin/led_listen.py >/dev/null &
-    ;;
-  status)
-    PID=`ps ax | grep led_listen | grep -v grep | awk '{print $1}'`
-    if [ $PID ]; then
-      echo "led-daemon is on"
-    else
-      echo "led-daemon is off"
-    fi
-    ;;
-  *)
-    echo "Usage: led-daemon {start|stop|restart|status}"
-    exit 1
-    ;;
+start)
+  echo "Starting led-daemon"
+  /usr/local/bin/led_listen.py >/dev/null &
+  ;;
+stop)
+  echo "Stopping led-daemon"
+  PID=$(ps ax | grep led_listen | grep -v grep | awk '{print $1}')
+  if [ $PID ]; then
+    kill -HUP $PID
+  fi
+  ;;
+restart)
+  echo "Restart led-daemon"
+  PID=$(ps ax | grep led_listen | grep -v grep | awk '{print $1}')
+  if [ $PID ]; then
+    kill -HUP $PID
+  fi
+  /usr/local/bin/led_listen.py >/dev/null &
+  ;;
+status)
+  PID=$(ps ax | grep led_listen | grep -v grep | awk '{print $1}')
+  if [ $PID ]; then
+    echo "led-daemon is on"
+  else
+    echo "led-daemon is off"
+  fi
+  ;;
+*)
+  echo "Usage: led-daemon {start|stop|restart|status}"
+  exit 1
+  ;;
 esac
 
-exit 0 
-
+exit 0

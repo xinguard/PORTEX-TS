@@ -3,7 +3,7 @@
 #
 #
 # Exit if detect other process
-declare PROG_NAME=`echo $0 | awk -F/ '{print $NF}'`
+declare PROG_NAME=$(echo $0 | awk -F/ '{print $NF}')
 ps auxf | egrep -w $PROG_NAME | egrep -v "grep|$PPID|$$" >/dev/null 2>&1
 [ $? -eq 0 ] && echo "Process $PROG_NAME exit by detecting duplicated process." && exit 1
 
@@ -24,19 +24,19 @@ declare -i PROG_PERIOD=${PORTEX_CONF[LOG_PERIOD]}
 # Command option list
 while getopts ":vf:" OPT; do
 	case $OPT in
-		v)
-			VERBOSE_FLAG=ON
-			;;
-		f)
-			[ `echo $OPTARG | egrep '^[0-9]+$'` ] && PROG_PERIOD=$OPTARG		# Check if interger then assign
-			;;
-		:)
-			PROG_PERIOD=${PROTEX_CONF[LOG_PERIOD]}
-			;;
-		*)
-			echo "Invlaid opton(s)." >&2
-			exit 1
-			;;
+	v)
+		VERBOSE_FLAG=ON
+		;;
+	f)
+		[ $(echo $OPTARG | egrep '^[0-9]+$') ] && PROG_PERIOD=$OPTARG # Check if interger then assign
+		;;
+	:)
+		PROG_PERIOD=${PROTEX_CONF[LOG_PERIOD]}
+		;;
+	*)
+		echo "Invlaid opton(s)." >&2
+		exit 1
+		;;
 	esac
 done
 
@@ -49,70 +49,59 @@ done
 # Enter main loop
 while [ TRUE ]; do
 
-#
-if [ -s $LOG_BUFFER ]; then		# Execute when log buffer is not empty
+	#
+	if [ -s $LOG_BUFFER ]; then # Execute when log buffer is not empty
+		[ $VERBOSE_FLAG == "ON" ] && echo "New message(s) in log buffer, try to send log."
+		unset PORTEX_CONF
+		declare -A PORTEX_CONF=""
+		CONFIG_READ $PORTEX_TS_CONF LOG_
+		#
+		# Check log server status
+		#
+		declare -i LOG_SERVER_FLAG=0
+		declare -i LOG_SERVER1_FLAG=0
+		declare -i LOG_SERVER2_FLAG=0
+		if [ -n ${PORTEX_CONF[LOG_SERVER1_IP]} ]; then
+			ping -c 1 ${PORTEX_CONF[LOG_SERVER1_IP]} >/dev/null 2>&1
+			if [ $? -eq 0 ]; then
+				LOG_SERVER1_FLAG=1
+				LOG_SERVER_FLAG=1
+				[ $VERBOSE_FLAG == "ON" ] && echo "Configured SYSLOG server ${PORTEX_CONF[LOG_SERVER1_IP]} is available."
+			fi
+		fi
+		if [ -n ${PORTEX_CONF[LOG_SERVER2_IP]} ]; then
+			ping -c 1 ${PORTEX_CONF[LOG_SERVER2_IP]} >/dev/null 2>&1
+			if [ $? -eq 0 ]; then
+				LOG_SERVER2_FLAG=1
+				LOG_SERVER_FLAG=1
+				[ $VERBOSE_FLAG == "ON" ] && echo "Configured SYSLOG server ${PORTEX_CONF[LOG_SERVER2_IP]} is available."
+			fi
+		fi
+		if [ $LOG_SERVER_FLAG -eq 0 ]; then
+			[ $VERBOSE_FLAG == "ON" ] && echo -e "Two log servers are unavailable, will try after ${PORTEX_CONF[LOG_RETRY]} seconds.\n"
+			sleep ${PORTEX_CONF[LOG_RETRY]}
+		else
+			while [ -s $LOG_BUFFER ]; do
+				#	echo "There is buffered log"
+				LOG_ENTRY=$(head -1 $LOG_BUFFER)
+				LOG_KEY=$(echo $LOG_ENTRY | awk -F# '{print $1}')
+				LOG_TIME=$(echo $LOG_ENTRY | awk -F# '{print $2}')
+				LOG_TAG=$(echo $LOG_ENTRY | awk -F# '{print $3}')
+				LOG_FACILITY=$(echo $LOG_ENTRY | awk -F# '{print $4}')
+				LOG_LEVEL=$(echo $LOG_ENTRY | awk -F# '{print $5}')
+				LOG_MESG=$(echo $LOG_ENTRY | awk -F# '{print $6}')
+				[ $VERBOSE_FLAG == "ON" ] && echo $LOG_KEY $LOG_TIME $LOG_TAG $LOG_FACILITY.$LOG_LEVEL $LOG_MESG
+				[ $LOG_SERVER1_FLAG -eq 1 ] && echo "Send log to ${PORTEX_CONF[LOG_SERVER1_IP]}"
+				[ $LOG_SERVER1_FLAG -eq 1 ] && /usr/bin/logger -t $LOG_TAG -n ${PORTEX_CONF[LOG_SERVER1_IP]} -p $LOG_FACILITY.$LOG_LEVEL $LOG_TIME $LOG_MESG
 
-[ $VERBOSE_FLAG == "ON" ] && echo "New message(s) in log buffer, try to send log."
-unset PORTEX_CONF
-declare -A PORTEX_CONF=""
-CONFIG_READ $PORTEX_TS_CONF LOG_
+				[ $LOG_SERVER2_FLAG -eq 1 ] && echo "Send log to ${PORTEX_CONF[LOG_SERVER2_IP]}"
+				[ $LOG_SERVER2_FLAG -eq 1 ] && /usr/bin/logger -t $LOG_TAG -n ${PORTEX_CONF[LOG_SERVER2_IP]} -p $LOG_FACILITY.$LOG_LEVEL $LOG_TIME $LOG_MESG
 
-#
-# Check log server status
-#
-declare -i LOG_SERVER_FLAG=0
-declare -i LOG_SERVER1_FLAG=0
-declare -i LOG_SERVER2_FLAG=0
-
-if [ -n ${PORTEX_CONF[LOG_SERVER1_IP]} ]; then
-	ping -c 1 ${PORTEX_CONF[LOG_SERVER1_IP]} >/dev/null 2>&1
-	if [ $? -eq 0 ]; then
-		LOG_SERVER1_FLAG=1
-		LOG_SERVER_FLAG=1
-		[ $VERBOSE_FLAG == "ON" ] && echo "Configured SYSLOG server ${PORTEX_CONF[LOG_SERVER1_IP]} is available."
+				sed -i "/$LOG_KEY/d" $LOG_BUFFER
+				[ $VERBOSE_FLAG == "ON" ] && echo ""
+				sleep 1
+			done
+		fi
 	fi
-fi
-
-if [ -n ${PORTEX_CONF[LOG_SERVER2_IP]} ]; then
-	ping -c 1 ${PORTEX_CONF[LOG_SERVER2_IP]} >/dev/null 2>&1
-	if [ $? -eq 0 ];then
-		LOG_SERVER2_FLAG=1
-		LOG_SERVER_FLAG=1
-		[ $VERBOSE_FLAG == "ON" ] && echo "Configured SYSLOG server ${PORTEX_CONF[LOG_SERVER2_IP]} is available."
-	fi
-fi
-
-if [ $LOG_SERVER_FLAG -eq 0 ]; then
-	[ $VERBOSE_FLAG == "ON" ] && echo -e "Two log servers are unavailable, will try after ${PORTEX_CONF[LOG_RETRY]} seconds.\n"
-	sleep ${PORTEX_CONF[LOG_RETRY]}
-else
-while [ -s $LOG_BUFFER ]; do
-#	echo "There is buffered log"
-	LOG_ENTRY=`head -1 $LOG_BUFFER`
-	LOG_KEY=`echo $LOG_ENTRY | awk -F# '{print $1}'`
-	LOG_TIME=`echo $LOG_ENTRY | awk -F# '{print $2}'`
-	LOG_TAG=`echo $LOG_ENTRY | awk -F# '{print $3}'`
-	LOG_FACILITY=`echo $LOG_ENTRY | awk -F# '{print $4}'`
-	LOG_LEVEL=`echo $LOG_ENTRY | awk -F# '{print $5}'`
-	LOG_MESG=`echo $LOG_ENTRY | awk -F# '{print $6}'`
-
-	[ $VERBOSE_FLAG == "ON" ] && echo $LOG_KEY $LOG_TIME $LOG_TAG $LOG_FACILITY.$LOG_LEVEL $LOG_MESG
-
-	[ $LOG_SERVER1_FLAG -eq 1 ] && echo "Send log to ${PORTEX_CONF[LOG_SERVER1_IP]}"
-	[ $LOG_SERVER1_FLAG -eq 1 ] && /usr/bin/logger -t $LOG_TAG -n ${PORTEX_CONF[LOG_SERVER1_IP]} -p $LOG_FACILITY.$LOG_LEVEL $LOG_TIME $LOG_MESG
-	
-	[ $LOG_SERVER2_FLAG -eq 1 ] && echo "Send log to ${PORTEX_CONF[LOG_SERVER2_IP]}"
-	[ $LOG_SERVER2_FLAG -eq 1 ] && /usr/bin/logger -t $LOG_TAG -n ${PORTEX_CONF[LOG_SERVER2_IP]} -p $LOG_FACILITY.$LOG_LEVEL $LOG_TIME $LOG_MESG
-	
-	sed -i "/$LOG_KEY/d" $LOG_BUFFER
-	[ $VERBOSE_FLAG == "ON" ] && echo ""
-
-	sleep 1
-
-done
-fi
-
-fi 
-
-sleep $PROG_PERIOD
+	sleep $PROG_PERIOD
 done

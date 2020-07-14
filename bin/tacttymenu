@@ -2,7 +2,6 @@
 #
 #Revision:2018110404
 #
-
 export PATH=/sbin:${PATH}
 
 PROG_NAME=tacttymenu

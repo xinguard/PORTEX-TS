@@ -1,10 +1,7 @@
 #!/bin/bash
 #
-#Revision:2018110701
+#Revision:2020200619
 #
-
-REV="20200619"
-
 export PATH=/sbin:${PATH}
 
 PROG_NAME=tacmenusu
@@ -65,7 +62,6 @@ function show_sysinfo() {
 # set infinite loop
 #
 while true; do
-
     ### display main menu ###
     #    whiptail --clear --backtitle "MCSC SS rev:${REV} HOSTNAME: $HOSTNAME" \
     dialog --clear --help-button --backtitle "MCSC SS rev:${REV} HOSTNAME: $HOSTNAME" \
@@ -140,5 +136,4 @@ while true; do
         break
         ;;
     esac
-
 done

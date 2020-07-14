@@ -10,18 +10,18 @@ trap "CONFIG_READ $PORTEX_TS_CONF RCHK_" SIGHUP
 
 CONFIG_READ $PORTEX_TS_CONF RCHK_
 
-if [ -z "$1" ];then
-        declare PERIOD=${PORTEX_CONF[RCHK_TACSVR]}
+if [ -z "$1" ]; then
+	declare PERIOD=${PORTEX_CONF[RCHK_TACSVR]}
 else
-		declare PERIOD=${PORTEX_CONF[RCHK_TACSVR]}
-		[ `echo $1 | egrep '^[0-9]+$'` ] && PERIOD=$1	# Check if $1 is an interger
+	declare PERIOD=${PORTEX_CONF[RCHK_TACSVR]}
+	[ $(echo $1 | egrep '^[0-9]+$') ] && PERIOD=$1 # Check if $1 is an interger
 fi
 
 TAC_SERVER_INFO="/home/portex/portex_ts.conf"
 
-function TAC_TEST(){
-	TAC_SERVER1=`cat $TAC_SERVER_INFO | egrep -v '#' | egrep TAC_SERVER1_IP | awk -F= '{print $2}'`
-	TAC_SERVER2=`cat $TAC_SERVER_INFO | egrep -v '#' | egrep TAC_SERVER2_IP | awk -F= '{print $2}'`
+function TAC_TEST() {
+	TAC_SERVER1=$(cat $TAC_SERVER_INFO | egrep -v '#' | egrep TAC_SERVER1_IP | awk -F= '{print $2}')
+	TAC_SERVER2=$(cat $TAC_SERVER_INFO | egrep -v '#' | egrep TAC_SERVER2_IP | awk -F= '{print $2}')
 
 	/bin/nc -vz -w 3 $TAC_SERVER1 49 &>/dev/null 2>&1
 	if [ $? -eq 0 ]; then
@@ -29,22 +29,20 @@ function TAC_TEST(){
 		echo "BLUE LED ON"
 		echo -e "blue_on\c" | nc -q 1 -U /var/run/uds_led
 		TSC_FLAG=1
-
 	else
-	        echo "Connect TACACS+ server1 unsuccessfully"
-	        /bin/nc -vz -w 3 $TAC_SERVER2 49 &>/dev/null 2>&1
-	        if [ $? -eq 0 ]; then
-	                echo "Connect TACACS+ server2 successfully"
-			echo "BLUE LED ON"
-			echo -e "blue_on\c" | nc -q 1 -U /var/run/uds_led
-	                TSC_FLAG=1
-	        else
-	                echo "Connect TACACS+ Server2 unsuccessfully"
-			echo "BLUE LED OFF"
-			echo -e "blue_off\c" | nc -q 1 -U /var/run/uds_led
+		echo "Connect TACACS+ server1 unsuccessfully"
+		/bin/nc -vz -w 3 $TAC_SERVER2 49 &>/dev/null 2>&1
+		if [ $? -eq 0 ]; then
+			echo "Connect TACACS+ server2 successfully"
+			cho "BLUE LED ON"
+			cho -e "blue_on\c" | nc -q 1 -U /var/run/uds_led
+			TSC_FLAG=1
+		else
+			echo "Connect TACACS+ Server2 unsuccessfully"
+			cho "BLUE LED OFF"
+			cho -e "blue_off\c" | nc -q 1 -U /var/run/uds_led
 			TSC_FLAG=0
-
-	        fi
+		fi
 	fi
 	echo ""
 }
@@ -67,52 +65,51 @@ declare TAC_FAIL=0
 while [ TRUE ]; do
 	echo "Last status is $LAST_STATUS"
 	case $LAST_STATUS in
-		OKOK)
-			echo "New status is OKOK"
-			COUNT=1
-			while [ $COUNT -le 4 ]; do
-				sleep $PERIOD
-				TAC_TEST
-				if [ $TSC_FLAG -eq 1 ];then
-					TAC_OKOK=0
+	OKOK)
+		echo "New status is OKOK"
+		COUNT=1
+		while [ $COUNT -le 4 ]; do
+			sleep $PERIOD
+			TAC_TEST
+			if [ $TSC_FLAG -eq 1 ]; then
+				TAC_OKOK=0
+				TAC_FAIL=0
+				break
+			else
+				TAC_FAIL=$((TAC_FAIL + 1))
+				COUNT=$((COUNT + 1))
+				echo "TAC_FAIL count is $TAC_FAIL"
+				if [ $TAC_FAIL -eq 4 ]; then
+					echo "Send loss log"
+					write_log_buffer cron crit TACACS "Loss ALL TACACS+ server connection!"
 					TAC_FAIL=0
-					break
-				else
-					TAC_FAIL=$((TAC_FAIL + 1))
-					COUNT=$((COUNT + 1))
-					echo "TAC_FAIL count is $TAC_FAIL"
-					if [ $TAC_FAIL -eq 4 ];then
-						echo "Send loss log"
-						write_log_buffer cron crit TACACS "Loss ALL TACACS+ server connection!"
-						TAC_FAIL=0
-						LAST_STATUS="FAIL"
-					fi
+					LAST_STATUS="FAIL"
 				fi
-			done
-			;;
-		FAIL)
-			echo "New status is FAILED"
-			COUNT=1
-			while [ $COUNT -le 4 ]; do
-				sleep $PERIOD
-				TAC_TEST
-				if [ $TSC_FLAG -eq 0 ];then
-					TAC_FAIL=0
+			fi
+		done
+		;;
+	FAIL)
+		echo "New status is FAILED"
+		COUNT=1
+		while [ $COUNT -le 4 ]; do
+			sleep $PERIOD
+			TAC_TEST
+			if [ $TSC_FLAG -eq 0 ]; then
+				TAC_FAIL=0
+				TAC_OKOK=0
+				break
+			else
+				TAC_OKOK=$((TAC_OKOK + 1))
+				COUNT=$((COUNT + 1))
+				echo "TAC_OKOK count is $TAC_OKOK"
+				if [ $TAC_OKOK -eq 4 ]; then
+					echo "Send restore log"
+					write_log_buffer cron notice TACACS "One of TACACS+ server connection restore."
 					TAC_OKOK=0
-					break
-				else
-					TAC_OKOK=$((TAC_OKOK + 1))
-					COUNT=$((COUNT + 1))
-					echo "TAC_OKOK count is $TAC_OKOK"
-					if [ $TAC_OKOK -eq 4 ];then
-						echo "Send restore log"
-						write_log_buffer cron notice TACACS  "One of TACACS+ server connection restore."
-						TAC_OKOK=0
-						LAST_STATUS="OKOK"
-					fi
+					LAST_STATUS="OKOK"
 				fi
-			done
-			;;
+			fi
+		done
+		;;
 	esac
 done
-

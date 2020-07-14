@@ -2,8 +2,7 @@
 
 source /usr/local/bin/writelog
 
-while [ ! -d /dev/shm ]
-do
+while [ ! -d /dev/shm ]; do
 	sleep 3
 done
 

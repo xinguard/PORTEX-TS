@@ -6,140 +6,140 @@ source /usr/local/bin/configmgmt
 
 PORTEX_TS_CONF="/home/portex/portex_ts.conf"
 
-
 prompt="Select function options: "
-options=("Show NTP server configuration" \
-	"Configure NTP server1" \
-	"Configure NTP server2" \
-	"Enable/Disable NTP function" \
-	"Test NTP server" \
-	)
+options=("Show NTP server configuration"
+	"Configure NTP server1"
+	"Configure NTP server2"
+	"Enable/Disable NTP function"
+	"Test NTP server"
+)
 
 echo ""
 PS3="$prompt "
-select opt in "${options[@]}" "Quit"; do 
-
-case "$REPLY" in
-
-1) echo "Show NTP server configuration: "
-	echo ""
-	declare -A PORTEX_CONF
-	CONFIG_READ $PORTEX_TS_CONF NTP_
-	echo -e "Current NTP function: ${PORTEX_CONF[NTP_ENABLE]}"
-	echo -e "Current NTP server1: ${PORTEX_CONF[NTP_SERVER1]}" 
-	echo -e "Current NTP server2: ${PORTEX_CONF[NTP_SERVER2]}"
-	echo ""
-	;;
-
-2) echo "Configure NTP server1: "
-	echo ""
-	declare -A PORTEX_CONF
-	CONFIG_READ $PORTEX_TS_CONF NTP_
-
-	echo -e "Current NTP server1: ${PORTEX_CONF[NTP_SERVER1]}"
-	echo ""
-	read -p "Are you sure to change the NTP information? (Y/N): " ANSWER
-	case $ANSWER in
-		Y) echo "Change NTP server1 configuration: "
+select opt in "${options[@]}" "Quit"; do
+	case "$REPLY" in
+	1)
+		echo "Show NTP server configuration: "
+		echo ""
+		declare -A PORTEX_CONF
+		CONFIG_READ $PORTEX_TS_CONF NTP_
+		echo -e "Current NTP function: ${PORTEX_CONF[NTP_ENABLE]}"
+		echo -e "Current NTP server1: ${PORTEX_CONF[NTP_SERVER1]}"
+		echo -e "Current NTP server2: ${PORTEX_CONF[NTP_SERVER2]}"
+		echo ""
+		;;
+	2)
+		echo "Configure NTP server1: "
+		echo ""
+		declare -A PORTEX_CONF
+		CONFIG_READ $PORTEX_TS_CONF NTP_
+		echo -e "Current NTP server1: ${PORTEX_CONF[NTP_SERVER1]}"
+		echo ""
+		read -p "Are you sure to change the NTP information? (Y/N): " ANSWER
+		case $ANSWER in
+		Y)
+			echo "Change NTP server1 configuration: "
 			echo ""
 			read -p "New NTP server1: " ANSWER_NTP
 			CONFIG_CHANGE -m "NTP_SERVER1=$ANSWER_NTP"
 			echo ""
 			;;
-		*) echo "NTP server1 configuration unchanged."
+		*)
+			echo "NTP server1 configuration unchanged."
 			echo ""
 			;;
-	esac
-	;;
-
-3) echo "Configure NTP server2: "
-        echo ""
-        declare -A PORTEX_CONF
-        CONFIG_READ $PORTEX_TS_CONF NTP_
-
-        echo -e "Current NTP server2: ${PORTEX_CONF[NTP_SERVER2]}"
-        echo ""
-        read -p "Are you sure to change the NTP information? (Y/N): " ANSWER
-        case $ANSWER in
-                Y) echo "Change NTP server2 configuration: "
-                        echo ""
-                        read -p "New NTP server2: " ANSWER_NTP
-                        CONFIG_CHANGE -m "NTP_SERVER2=$ANSWER_NTP"
-                        echo ""
-                        ;;
-                *) echo "NTP server2 configuration unchanged."
-                        echo ""
-                        ;;
-        esac
-        ;;
-
-4) echo "Enable or Disable NTP function: "
-	echo ""
-	declare -A PORTEX_CONF
-	CONFIG_READ $PORTEX_TS_CONF NTP_
-
-	echo -e "Current NTP function is ${PORTEX_CONF[NTP_ENABLE]}."
-	case ${PORTEX_CONF[NTP_ENABLE]} in
+		esac
+		;;
+	3)
+		echo "Configure NTP server2: "
+		echo ""
+		declare -A PORTEX_CONF
+		CONFIG_READ $PORTEX_TS_CONF NTP_
+		echo -e "Current NTP server2: ${PORTEX_CONF[NTP_SERVER2]}"
+		echo ""
+		read -p "Are you sure to change the NTP information? (Y/N): " ANSWER
+		case $ANSWER in
+		Y)
+			echo "Change NTP server2 configuration: "
+			echo ""
+			read -p "New NTP server2: " ANSWER_NTP
+			CONFIG_CHANGE -m "NTP_SERVER2=$ANSWER_NTP"
+			echo ""
+			;;
+		*)
+			echo "NTP server2 configuration unchanged."
+			echo ""
+			;;
+		esac
+		;;
+	4)
+		echo "Enable or Disable NTP function: "
+		echo ""
+		declare -A PORTEX_CONF
+		CONFIG_READ $PORTEX_TS_CONF NTP_
+		echo -e "Current NTP function is ${PORTEX_CONF[NTP_ENABLE]}."
+		case ${PORTEX_CONF[NTP_ENABLE]} in
 		ON)
 			echo ""
 			read -p "Do you want to switch NTP function to OFF? (Y/N): " ANSWER_ONOFF
 			case $ANSWER_ONOFF in
-				Y)
-					CONFIG_CHANGE -m "NTP_ENABLE=OFF"
-					echo "NTP function switch to OFF."
-					;;
-				*)
-					echo "NTP function no unchanged."
-					;;
+			Y)
+				CONFIG_CHANGE -m "NTP_ENABLE=OFF"
+				echo "NTP function switch to OFF."
+				;;
+			*)
+				echo "NTP function no unchanged."
+				;;
 			esac
 			;;
 		OFF)
 			echo ""
 			read -p "Do you want to switch NTP function to ON? (Y/N): " ANSWER_ON_OFF
 			case $ANSWER_ONOFF in
-				Y)
-					CONFIG_CHANGE -m "NTP_ENABLE=ON"
-					echo "NTP function switch to ON."
-					;;
-				*)
-					echo "NTP function unchanged/"
-					;;
+			Y)
+				CONFIG_CHANGE -m "NTP_ENABLE=ON"
+				echo "NTP function switch to ON."
+				;;
+			*)
+				echo "NTP function unchanged/"
+				;;
 			esac
 			;;
 		*)
 			echo "Fetal error."
 			exit 1
 			;;
-	esac
-	;;
-
-5) echo "Test NTP server."
-	echo ""
-	declare -A PORTEX_CONF
-	CONFIG_READ $PORTEX_TS_CONF NTP_
-	if [ -n $PORTEX_CONF[NTP_SERVER1]} ]; then
-		ping -c 1 ${PORTEX_CONF[NTP_SERVER1]} >/dev/null 2>&1
-		if [ $? -eq 0 ]; then
-			echo "Configured NTP server ${PORTEX_CONF[NTP_SERVER1]} is available."
-		else
-			echo "Configured NTP server ${PORTEX_CONF[NTP_SERVER1]} is unavailable."
+		esac
+		;;
+	5)
+		echo "Test NTP server."
+		echo ""
+		declare -A PORTEX_CONF
+		CONFIG_READ $PORTEX_TS_CONF NTP_
+		if [ -n $PORTEX_CONF[NTP_SERVER1]} ]; then
+			ping -c 1 ${PORTEX_CONF[NTP_SERVER1]} >/dev/null 2>&1
+			if [ $? -eq 0 ]; then
+				echo "Configured NTP server ${PORTEX_CONF[NTP_SERVER1]} is available."
+			else
+				echo "Configured NTP server ${PORTEX_CONF[NTP_SERVER1]} is unavailable."
+			fi
 		fi
-	fi
-	if [ -n $PORTEX_CONF[NTP_SERVER2]} ]; then
-                ping -c 1 ${PORTEX_CONF[NTP_SERVER2]} >/dev/null 2>&1
-                if [ $? -eq 0 ]; then
-                        echo "Configured NTP server ${PORTEX_CONF[NTP_SERVER2]} is available."
-                else
-                        echo "Configured NTP server ${PORTEX_CONF[NTP_SERVER2]} is unavailable."
-                fi
-        fi
-	;;
-
-$(( ${#options[@]}+1 )) ) echo "Goodbye!"; break;;
-
-*) echo "Invalid option. Try another one.";continue;;
-
-esac
-
+		if [ -n $PORTEX_CONF[NTP_SERVER2]} ]; then
+			ping -c 1 ${PORTEX_CONF[NTP_SERVER2]} >/dev/null 2>&1
+			if [ $? -eq 0 ]; then
+				echo "Configured NTP server ${PORTEX_CONF[NTP_SERVER2]} is available."
+			else
+				echo "Configured NTP server ${PORTEX_CONF[NTP_SERVER2]} is unavailable."
+			fi
+		fi
+		;;
+	$((${#options[@]} + 1)))
+		echo "Goodbye!"
+		break
+		;;
+	*)
+		echo "Invalid option. Try another one."
+		continue
+		;;
+	esac
 done
-
