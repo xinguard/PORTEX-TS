@@ -1,7 +1,8 @@
 #!/bin/bash
 #
-# Configured script to change user password
+# Configured script to set Ethernet and WiFi configuration
 #
+
 source /usr/local/bin/passwdmgmt
 source /usr/local/bin/configmgmt
 source /usr/local/bin/writelog
