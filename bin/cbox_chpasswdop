@@ -47,6 +47,7 @@ while true; do
 		CONFIG_CHANGE -d $ACCT_NAME:localuser:
 		CONFIG_CHANGE -a $ACCT_NAME:localuser:$ACCT_PRIV:$OUTPUT_CRYPT
 		echo "God job!"
+		sleep 3
 		break
 		;;
 	1)
