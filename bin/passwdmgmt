@@ -25,21 +25,21 @@ function NEWPASS_CHECK() {
 	INPUT_PASS1="$1"
 	INPUT_PASS2="$2"
 
-	if [ $INPUT_PASS1 == $INPUT_PASS2 ]; then
+	if [ "$INPUT_PASS1" == "$INPUT_PASS2" ]; then
 		declare -i LEN_SCORE=0
 		declare -a PWD_SCORE=(0 0 0 0)
-		CHAR_COUNT=$(echo ${#INPUT_PASS1})
-		[ $CHAR_COUNT -ge 8 ] && LEN_SCORE=1
-		echo $INPUT_PASS1 | egrep "[A-Z]" >/dev/null 2>&1
+		CHAR_COUNT=${#INPUT_PASS1}
+		[ "$CHAR_COUNT" -ge 8 ] && LEN_SCORE=1
+		echo "$INPUT_PASS1" | grep -E "[A-Z]" >/dev/null 2>&1
 		[ $? -eq 0 ] && PWD_SCORE[0]=1
-		echo $INPUT_PASS1 | egrep "[a-z]" >/dev/null 2>&1
+		echo "$INPUT_PASS1" | grep -E "[a-z]" >/dev/null 2>&1
 		[ $? -eq 0 ] && PWD_SCORE[1]=1
-		echo $INPUT_PASS1 | egrep "[0-9]" >/dev/null 2>&1
+		echo "$INPUT_PASS1" | grep -E "[0-9]" >/dev/null 2>&1
 		[ $? -eq 0 ] && PWD_SCORE[2]=1
-		echo $INPUT_PASS1 | egrep "[!@#$%^&*()]" >/dev/null 2>&1
+		echo "$INPUT_PASS1" | grep -E "[!@#$%^&*()]" >/dev/null 2>&1
 		[ $? -eq 0 ] && PWD_SCORE[3]=1
 		declare -i SUM_SCORE=0
-		for i in ${PWD_SCORE[@]}; do
+		for i in "${PWD_SCORE[@]}"; do
 			SUM_SCORE+=$i
 		done
 		declare -i SCORE_RESULT=0
@@ -62,9 +62,9 @@ function OLDPASS_CHECK() {
 	INPUT_PASSWD="$1"
 	INPUT_CRYPT="$2"
 	INPUT_SALT=$(echo "$INPUT_CRYPT" | awk -F$ '{print $3}')
-#	INPUT_SALT=`echo $INPUT_CRYPT | awk -F$ '{print $3}'`
-	OUTPUT_CRYPT=$(/usr/bin/mkpasswd --method=SHA-512 -S $INPUT_SALT $INPUT_PASSWD)
-	if [ $INPUT_CRYPT == $OUTPUT_CRYPT ]; then
+	#	INPUT_SALT=`echo $INPUT_CRYPT | awk -F$ '{print $3}'`
+	OUTPUT_CRYPT=$(/usr/bin/mkpasswd --method=SHA-512 -S "$INPUT_SALT" "$INPUT_PASSWD")
+	if [ "$INPUT_CRYPT" == "$OUTPUT_CRYPT" ]; then
 		return 0
 	else
 		return 1
@@ -72,18 +72,18 @@ function OLDPASS_CHECK() {
 }
 
 function PASS_CHECK() {
-	local OPTIND OPT c n
+	local OPTIND OPT
 	while getopts ":c:n:" OPT; do
 		set -f
 		IFS=':'
 		declare PWD_ARRAY=($2)
 		case $OPT in
 		c)
-			OLDPASS_CHECK ${PWD_ARRAY[0]} ${PWD_ARRAY[1]}
+			OLDPASS_CHECK "${PWD_ARRAY[0]}" "${PWD_ARRAY[1]}"
 			return $?
 			;;
 		n)
-			NEWPASS_CHECK ${PWD_ARRAY[0]} ${PWD_ARRAY[1]}
+			NEWPASS_CHECK "${PWD_ARRAY[0]}" "${PWD_ARRAY[1]}"
 			return $?
 			;;
 		*)

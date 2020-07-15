@@ -91,16 +91,16 @@ function CONFIG_CHANGE() {
 function CONFIG_READ() {
 	CONF_FILE=$1
 	CONF_KEY=$2
-	if [ -n $CONF_KEY ]; then
-		for ITEM in $(cat $CONF_FILE | egrep -v '#' | egrep $CONF_KEY); do
-			KEY=$(echo $ITEM | awk -F= '{print $1}')
-			VALUE=$(echo $ITEM | awk -F= '{print $2}')
+	if [ -n "$CONF_KEY" ]; then
+		for ITEM in $(cat "$CONF_FILE" | egrep -v '#' | egrep "$CONF_KEY"); do
+			KEY=$(echo "$ITEM" | awk -F= '{print $1}')
+			VALUE=$(echo "$ITEM" | awk -F= '{print $2}')
 			PORTEX_CONF[$KEY]=$VALUE
 		done
 	else
-		for ITEM in $(cat $CONF_FILE | egrep -v '#'); do
-			KEY=$(echo $ITEM | awk -F= '{print $1}')
-			VALUE=$(echo $ITEM | awk -F= '{print $2}')
+		for ITEM in $(cat "$CONF_FILE" | egrep -v '#'); do
+			KEY=$(echo "$ITEM" | awk -F= '{print $1}')
+			VALUE=$(echo "$ITEM" | awk -F= '{print $2}')
 			PORTEX_CONF[$KEY]=$VALUE
 		done
 	fi
