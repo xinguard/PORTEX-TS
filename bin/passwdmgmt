@@ -4,15 +4,13 @@
 #
 # Usage:
 # -c Password Encrypt_passwd to check existing password
-#
 # -n New_Password New_password to check new password
-#
 #
 # New password policy statement
 function NEWPASS_NOTIFY() {
 	echo "Password Strength Requirement:"
 	echo "  1: At least 8 characters long."
-	echo "  2: Include three of the following four factors:"
+	echo "  2: Include minimum three of the following four factors:"
 	echo "          A. Numbers."
 	echo "          B. Letters in uppercase."
 	echo "          C. Letters in lowercase."
@@ -63,8 +61,8 @@ function NEWPASS_CHECK() {
 function OLDPASS_CHECK() {
 	INPUT_PASSWD="$1"
 	INPUT_CRYPT="$2"
-#	INPUT_SALT=$(echo $INPUT_CRYPT | awk -F$ '{print $3}')
-	INPUT_SALT=`echo $INPUT_CRYPT | awk -F$ '{print $3}'`
+	INPUT_SALT=$(echo "$INPUT_CRYPT" | awk -F$ '{print $3}')
+#	INPUT_SALT=`echo $INPUT_CRYPT | awk -F$ '{print $3}'`
 	OUTPUT_CRYPT=$(/usr/bin/mkpasswd --method=SHA-512 -S $INPUT_SALT $INPUT_PASSWD)
 	if [ $INPUT_CRYPT == $OUTPUT_CRYPT ]; then
 		return 0
