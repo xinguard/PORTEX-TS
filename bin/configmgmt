@@ -56,7 +56,7 @@ function CONFIG_CHANGE() {
 		p) # Usage -p ACCOUNT_NAME:localuser:ACCOUNT_PRIVILEGE:ACCOUNT_PASSWORD
 			#				echo "Change password"
 			INPUT_VAL=$OPTARG
-			ACCT_NAME=$(echo $INPUT_VAL | awk -F: '{print $1}')
+			ACCT_NAME=$(echo "$INPUT_VAL" | awk -F: '{print $1}')
 			sed -i "\|^$ACCT_NAME|d" $CONF_FILE
 			sed -i "/# Local account entries begin/ a $INPUT_VAL" $CONF_FILE
 			;;
