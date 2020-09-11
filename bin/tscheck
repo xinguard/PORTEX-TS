@@ -34,13 +34,13 @@ function TAC_TEST() {
 		/bin/nc -vz -w 3 $TAC_SERVER2 49 &>/dev/null 2>&1
 		if [ $? -eq 0 ]; then
 			echo "Connect TACACS+ server2 successfully"
-			cho "BLUE LED ON"
-			cho -e "blue_on\c" | nc -q 1 -U /var/run/uds_led
+			echo "BLUE LED ON"
+			echo -e "blue_on\c" | nc -q 1 -U /var/run/uds_led
 			TSC_FLAG=1
 		else
 			echo "Connect TACACS+ Server2 unsuccessfully"
-			cho "BLUE LED OFF"
-			cho -e "blue_off\c" | nc -q 1 -U /var/run/uds_led
+			echo "BLUE LED OFF"
+			echo -e "blue_off\c" | nc -q 1 -U /var/run/uds_led
 			TSC_FLAG=0
 		fi
 	fi
