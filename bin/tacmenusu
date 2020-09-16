@@ -122,7 +122,7 @@ while true; do
         /usr/local/bin/cbox_user
         ;;
     "System mgmt.")
-        /usr/local/bin/cbox_cli
+        sudo /usr/local/bin/cbox_cli
         ;;
     "Backup/Restore")
         dialog --backtitle "SS Menu Output" --title "Backup/Restore" --clear --msgbox "Backup/Restore" 20 40
