@@ -88,12 +88,13 @@ if [ ${PORTEX_CONF[TAC_ENABLE]} == "ON" ]; then
 			ERROR_ACCT[$TRY_COUNT]=$TAC_USERID
 			TRY_COUNT=$((TRY_COUNT + 1))
 			if [ $TRY_COUNT -le 2 ]; then
+				write_log_buffer auth info LOGIN "Multiple login failed $TRY_COUNT times from IP:$SSH_SOURCE, attemp account:$ERROR_ACCT_LIST" >/dev/null 2>&1
 				echo "Incorrect TACACS+ username or password, try again"
 				echo ""
 			else
 				echo ""
 				ERROR_ACCT_LIST=$(echo ${ERROR_ACCT[@]})
-				write_log_buffer auth info LOGIN "Multiple login failed from IP:$SSH_SOURCE, attemp account:$ERROR_ACCT_LIST" >/dev/null 2>&1
+				write_log_buffer auth info LOGIN "Multiple login failed $TRY_COUNT times from IP:$SSH_SOURCE, attemp account:$ERROR_ACCT_LIST" >/dev/null 2>&1
 				echo "Login failed."
 				exit 1
 			fi
@@ -157,12 +158,13 @@ while [ TRUE ]; do
 			ERROR_ACCT[$TRY_COUNT]=$LOCAL_USERID
 			TRY_COUNT=$((TRY_COUNT + 1))
 			if [ $TRY_COUNT -le 2 ]; then
+				write_log_buffer auth info LOGIN "Multiple login failed $TRY_COUNT times from IP:$SSH_SOURCE, attemp account:$ERROR_ACCT_LIST" >/dev/null 2>&1
 				echo "Local username/password is NOT correct; try again."
 				echo ""
 			else
 				echo ""
 				ERROR_ACCT_LIST=$(echo ${ERROR_ACCT[@]})
-				write_log_buffer auth info LOGIN "Multiple login failed from IP:$SSH_SOURCE, attemp account:$ERROR_ACCT_LIST" >/dev/null 2>&1
+				write_log_buffer auth info LOGIN "Multiple login failed $TRY_COUNT times from IP:$SSH_SOURCE, attemp account:$ERROR_ACCT_LIST" >/dev/null 2>&1
 				echo "Login failed."
 				exit 1
 			fi
@@ -171,12 +173,13 @@ while [ TRUE ]; do
 		ERROR_ACCT[$TRY_COUNT]=$LOCAL_USERID
 		TRY_COUNT=$((TRY_COUNT + 1))
 		if [ $TRY_COUNT -le 2 ]; then
+			write_log_buffer auth info LOGIN "Multiple login failed $TRY_COUNT times from IP:$SSH_SOURCE, attemp account:$ERROR_ACCT_LIST" >/dev/null 2>&1
 			echo "Local username/password is NOT correct; try again."
 			echo ""
 		else
 			echo ""
 			ERROR_ACCT_LIST=$(echo ${ERROR_ACCT[@]})
-			write_log_buffer auth info LOGIN "Multiple login failed from IP:$SSH_SOURCE, attemp account:$ERROR_ACCT_LIST" >/dev/null 2>&1
+			write_log_buffer auth info LOGIN "Multiple login failed $TRY_COUNT times from IP:$SSH_SOURCE, attemp account:$ERROR_ACCT_LIST" >/dev/null 2>&1
 			echo "Login failed."
 			exit 1
 		fi
