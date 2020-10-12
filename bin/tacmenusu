@@ -10,7 +10,7 @@ INPUT=/dev/shm/${PROG_NAME}-input.$$
 OUTPUT=/dev/shm/${PROG_NAME}-output.$$
 
 # trap and delete temp files
-trap "rm $OUTPUT; rm $INPUT; exit" SIGHUP SIGINT SIGTERM
+trap "[ -f $OUTPUT ] && rm $OUTPUT; [ -f $INPUT ] && rm $INPUT; exit" SIGHUP SIGINT SIGTERM
 
 #
 # TACACS+ Accounting
