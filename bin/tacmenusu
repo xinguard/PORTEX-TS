@@ -80,7 +80,6 @@ while true; do
         "Service mgmt." "Service management" \
         "User mgmt." "Local account management" \
         "System mgmt." "System management" \
-        "Backup/Restore" "Backup/Restore" \
         Exit "Exit/Logout" 2>"${INPUT}"
 
     _status=$?
