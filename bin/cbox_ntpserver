@@ -5,6 +5,7 @@
 source /usr/local/bin/configmgmt
 
 PORTEX_TS_CONF="/home/portex/portex_ts.conf"
+NTPCMD="/usr/sbin/ntpdate -q"
 
 prompt="Select function options: "
 options=("Show NTP server configuration"
@@ -117,7 +118,7 @@ select opt in "${options[@]}" "Quit"; do
 		declare -A PORTEX_CONF
 		CONFIG_READ $PORTEX_TS_CONF NTP_
 		if [ -n $PORTEX_CONF[NTP_SERVER1]} ]; then
-			ping -c 1 ${PORTEX_CONF[NTP_SERVER1]} >/dev/null 2>&1
+			$NTPCMD ${PORTEX_CONF[NTP_SERVER1]} >/dev/null 2>&1
 			if [ $? -eq 0 ]; then
 				echo "Configured NTP server ${PORTEX_CONF[NTP_SERVER1]} is available."
 			else
@@ -125,7 +126,7 @@ select opt in "${options[@]}" "Quit"; do
 			fi
 		fi
 		if [ -n $PORTEX_CONF[NTP_SERVER2]} ]; then
-			ping -c 1 ${PORTEX_CONF[NTP_SERVER2]} >/dev/null 2>&1
+			$NTPCMD ${PORTEX_CONF[NTP_SERVER2]} >/dev/null 2>&1
 			if [ $? -eq 0 ]; then
 				echo "Configured NTP server ${PORTEX_CONF[NTP_SERVER2]} is available."
 			else
