@@ -28,7 +28,7 @@ $ sudo sed -i '19a/usr/local/bin/portex_ts.init\n' /etc/rc.local
   
 ### Cron table setup for watchdog
 $ sudo 
-$ sudo /bin/bash -c "(crontab -l 2>/dev/null; echo '* * * * * /usr/local/bin/usbcheck') | crontab -"
+$ sudo /bin/bash -c "(crontab -l 2>/dev/null; echo '* * * * * /usr/local/bin/usbcheck') | crontab -"  
 $ sudo /bin/bash -c "(crontab -l 2>/dev/null; echo '* * * * * /usr/local/bin/regreport') | crontab -"   
 
 ### Reboot
