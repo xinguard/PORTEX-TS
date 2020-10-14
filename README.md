@@ -3,13 +3,13 @@
 PORTEX-TS software package installation guide
 
 ### System package upgrade:
-$ sudo apt-get update  
-$ sudo apt-get dist-upgrade  
-$ sudo apt-get install python-pip  
+$ sudo apt update  
+$ sudo apt dist-upgrade  
+$ sudo apt -y install python-pip  
 $ sudo pip install --upgrade pip  
 
 ### Necessary package installation:
-$ sudo apt-get -y install dialog git minicom tmux whois ntpdate   
+$ sudo apt -y install dialog git minicom tmux whois ntpdate   
 $ sudo pip install tacacs_plus RPi.GPIO   
 
 ### Local user account creation
@@ -27,8 +27,9 @@ $ sudo update-rc.d pwr-and-control-button-monitor defaults
 $ sudo sed -i '19a/usr/local/bin/portex_ts.init\n' /etc/rc.local  
   
 ### Cron table setup for watchdog
-$ sudo sed -i '$ a* * * * * \/usr\/local\/bin\/usbcheck' /var/spool/cron/crontabs/root  
-$ sudo sed -i '$ a* * * * * \/usr\/local\/bin\/regreport' /var/spool/cron/crontabs/root   
+$ sudo 
+$ sudo /bin/bash -c "(crontab -l 2>/dev/null; echo '* * * * * /usr/local/bin/usbcheck') | crontab -"
+$ sudo /bin/bash -c "(crontab -l 2>/dev/null; echo '* * * * * /usr/local/bin/regreport') | crontab -"   
 
 ### Reboot
 $ sudo shutdown -r now  
