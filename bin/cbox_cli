@@ -11,11 +11,11 @@ function HOSTNAME_SET() {
 	OLD_HOSTNAME=$(cat /etc/hostname)
 	echo "Original hostname: $OLD_HOSTNAME;"
 	while [ ! $NEW_HOSTNAME1 ]; do
-        read -p "Enter new hostname: " NEW_HOSTNAME1
-    done
+        	read -p "Enter new hostname: " NEW_HOSTNAME1
+    	done
 	while [ ! $NEW_HOSTNAME2 ]; do
-        read -p "Enter new hostname again: " NEW_HOSTNAME2
-    done
+        	read -p "Enter new hostname again: " NEW_HOSTNAME2
+    	done
 	[ "$NEW_HOSTNAME1" != "$NEW_HOSTNAME2" ] && echo "Entered hostnames are not the same." && NEWNAME_FLAG=0
 	[ "$OLD_HOSTNAME" = "$NEW_HOSTNAME2" ] && echo "New hostname is the same with the original one." && NEWNAME_FLAG=0
 	if [ $NEWNAME_FLAG = 0 ]; then
