@@ -8,6 +8,8 @@ declare -i REBOOT_FLAG=0
 
 function HOSTNAME_SET() {
 	NEWNAME_FLAG=1
+	NEW_HOSTNAME1=''
+	NEW_HOSTNAME2=''
 	OLD_HOSTNAME=$(cat /etc/hostname)
 	echo "Original hostname: $OLD_HOSTNAME;"
 	while [ ! $NEW_HOSTNAME1 ]; do
