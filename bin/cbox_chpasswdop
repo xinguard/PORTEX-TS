@@ -17,7 +17,7 @@ function acct_check() {
 	fi
 }
 
-if [ $AUTH_METHOD = "LOCAL" ]; then
+if [ $AUTH_METHOD = "TAC" ]; then
         echo ""
         echo "It's understand TACACS+ authentication, can not change local password."
         echo "Please disable TACACS+ authentication before changing local password."
