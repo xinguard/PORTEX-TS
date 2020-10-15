@@ -70,11 +70,13 @@ if [ ${PORTEX_CONF[TAC_ENABLE]} == "ON" ]; then
 			case $AAA_GROUP in
 			tacmenusu*)
 				[ ${PORTEX_CONF[LOG_ENABLE]} == "ON" ] && write_log_buffer auth info LOGIN "Administrator $TAC_USERID login successfully from $SSH_SOURCE by TACACS+ server $TAC_SERVER authentication."
+				export AUTH_METHOD=TAC
 				/usr/local/bin/tacmenusu
 				exit 0
 				;;
 			tacmenuop*)
 				[ ${PORTEX_CONF[LOG_ENABLE]} == "ON" ] && write_log_buffer auth info LOGIN "Operator $TAC_USERID login successfully from $SSH_SOURCE by TACACS+ server $TAC_SERVER authentication."
+				export AUTH_METHOD=TAC
 				/usr/local/bin/tacmenuop
 				exit 0
 				;;
@@ -141,11 +143,13 @@ while [ TRUE ]; do
 			case $LOCAL_ACCT_PRIVILEGE in
 			admin)
 				write_log_buffer auth info LOGIN "Administrator $LOCAL_USERID login successfully from $SSH_SOURCE by local password authentication."
+				export AUTH_METHOD=LOCAL
 				/usr/local/bin/tacmenusu
 				exit 0
 				;;
 			op)
 				write_log_buffer auth info LOGIN "Operator $LOCAL_USERID login successfully from $SSH_SOURCE by local password authentication."
+				export AUTH_METHOD=LOCAL
 				/usr/local/bin/tacmenuop
 				exit 0
 				;;
