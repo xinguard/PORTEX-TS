@@ -17,6 +17,15 @@ function acct_check() {
 	fi
 }
 
+if [ $AUTH_METHOD = "LOCAL" ]; then
+        echo ""
+        echo "It's understand TACACS+ authentication, can not change local password."
+        echo "Please disable TACACS+ authentication before changing local password."
+        echo ""
+        read -n 1 -s -p "Press any key to previous page: " ANY_KEY
+        break
+fi
+
 while true; do
 	echo "Change local account $PORTEX_USERID password: "
 	echo ""
