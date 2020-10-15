@@ -1,13 +1,50 @@
 #!/bin/bash
 #
-# Configured script to set Ethernet and WiFi configuration
+# Configured script to set host relative configuration
 #
 
 CBOX_ETHERNET="/usr/local/bin/cbox_ethernet"
 CBOX_WIFI="/usr/local/bin/cbox_wifi"
+declare -i REBOOT_FLAG=0
+
+function HOSTNAME_SET() {
+	NEWNAME_FLAG=1
+	OLD_HOSTNAME=$(cat /etc/hostname)
+	echo "Original hostname: $OLD_HOSTNAME;"
+	while [ ! $NEW_HOSTNAME1 ]; do
+        read -p "Enter new hostname: " NEW_HOSTNAME1
+    done
+	while [ ! $NEW_HOSTNAME2 ]; do
+        read -p "Enter new hostname again: " NEW_HOSTNAME2
+    done
+	[ "$NEW_HOSTNAME1" != "$NEW_HOSTNAME2" ] && echo "Entered hostnames are not the same." && NEWNAME_FLAG=0
+	[ "$OLD_HOSTNAME" = "$NEW_HOSTNAME2" ] && echo "New hostname is the same with the original one." && NEWNAME_FLAG=0
+	if [ $NEWNAME_FLAG = 0 ]; then
+		echo "Hostname is not changed, try again."
+	else
+		sed -i "s/$OLD_HOSTNAME/$NEW_HOSTNAME2/g" /etc/hosts
+		sed -i "s/$OLD_HOSTNAME/$NEW_HOSTNAME2/g" /etc/hostname
+		echo "Hostname change is complete; new hostname is $NEW_HOSTNAME2"
+		REBOOT_FLAG=1
+	fi
+}
+
+function REBOOT_CHECK() {
+	declare REBOOT_ANS
+	if [ $REBOOT_FLAG -eq 1 ]; then
+		echo -e "Reboot is required to make change worked. \n"
+		read -p "Press 'YES' to reboot, other key to pass: " REBOOT_ANS
+		if [ "$REBOOT_ANS" = "YES" ]; then
+			echo "Let's reboot"
+		else
+			read -p "Configuration change will be worked after next reboot; press key to continuous" REBOOT_ANS
+		fi
+	fi
+}
 
 prompt="Select function options: "
-options=("Ethernet management"
+options=("Set hostname"
+	"Ethernet management"
 	"Wifi management"
 	"Restart cbox"
 	"Power-off cbox"
@@ -19,24 +56,32 @@ PS3="$prompt "
 select opt in "${options[@]}" "Quit"; do
 	case "$REPLY" in
 	1)
+		echo "Change hostname: "
+		echo ""
+		HOSTNAME_SET
+		echo ""
+		REBOOT_CHECK
+		echo ""
+		;;
+	2)
 		echo "Launch ethernet management process: "
 		echo ""
 		$CBOX_ETHERNET
 		echo ""
 		;;
-	2)
+	3)
 		echo "Launch wifi management: "
 		echo ""
 		$CBOX_WIFI
 		echo ""
 		;;
-	3)
+	4)
 		echo "Restart cbox: "
 		echo ""
 		shutdown -r now
 		echo ""
 		;;
-	4)
+	5)
 		echo "Power-off cbox: "
 		echo ""
 		echo "Remove power after onboard gree LED stop blinking!"
