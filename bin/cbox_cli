@@ -2,7 +2,6 @@
 #
 # Configured script to set host relative configuration
 #
-
 CBOX_ETHERNET="/usr/local/bin/cbox_ethernet"
 CBOX_WIFI="/usr/local/bin/cbox_wifi"
 declare -i REBOOT_FLAG=0
