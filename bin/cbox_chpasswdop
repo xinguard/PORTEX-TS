@@ -7,6 +7,8 @@ source /usr/local/bin/configmgmt
 source /usr/local/bin/writelog
 PORTEX_TS_CONF="/home/portex/portex_ts.conf"
 
+trap "exit 1" SIGINT
+
 function acct_check() {
 	LOCALACCT=$1
 	awk -F: '{print $1}' $PORTEX_TS_CONF | egrep -v '#' | egrep -w $LOCALACCT >/dev/null 2>&1
@@ -19,11 +21,11 @@ function acct_check() {
 
 if [ $AUTH_METHOD = "TAC" ]; then
         echo ""
-        echo "It's understand TACACS+ authentication, can not change local password."
+        echo "It can not change local password when TACACS+ authentication is available."
         echo "Please disable TACACS+ authentication before changing local password."
         echo ""
         read -n 1 -s -p "Press any key to previous page: " ANY_KEY
-        break
+        exit 1
 fi
 
 while true; do
