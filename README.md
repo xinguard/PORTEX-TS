@@ -1,8 +1,9 @@
 # PORTEX-TS
 
 ## Terminal server on Raspberry Pi
-## Use Raspberry Pi as a small terminal server
-## Support local account/password and TACACS+ authentication
+
+### Use Raspberry Pi as a small terminal server  
+### Support local account/password and TACACS+ authentication  
 
 ## PORTEX-TS software package installation guide
 
