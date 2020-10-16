@@ -24,3 +24,14 @@ sed -i 's/^#PermitEmptyPasswords no/PermitEmptyPasswords yes/' /etc/ssh/sshd_con
 sed -i 's/^UsePAM yes/UsePAM no/' /etc/ssh/sshd_config
 passwd -d portex
 service ssh reload
+
+# Check service daemon installation
+service led-daemon status >/dev/null 2>&1 || (echo "Install led-daemon service"; update-rc.d led-daemon defaults)
+service pwr-and-control-button-monitor status >/dev/null 2>&1 || (echo "Install pwr-and-control-button-monitor service"; update-rc.d pwr-and-control-button-monitor defaults)
+
+# Check booting script installation
+grep 'portex_ts.init' /etc/rc.local >/dev/null 2>&1 || (echo "Install booting script"; sed -i '19a/usr/local/bin/portex_ts.init\n' /etc/rc.local)
+
+# Check cron job installation
+crontab -l 2>/dev/null | grep usbcheck >/dev/null || (echo "Install cron job usbcheck"; /bin/bash -c "(crontab -l 2>/dev/null; echo '* * * * * /usr/local/bin/usbcheck') | crontab -")
+crontab -l 2>/dev/null | grep regreport >/dev/null || (echo "Install cron job regreport" && /bin/bash -c "(crontab -l 2>/dev/null; echo '* * * * * /usr/local/bin/regreport') | crontab -")
