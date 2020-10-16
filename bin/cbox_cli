@@ -37,6 +37,7 @@ function REBOOT_CHECK() {
 		read -p "Press 'YES' to reboot, other key to pass: " REBOOT_ANS
 		if [ "$REBOOT_ANS" = "YES" ]; then
 			echo "Let's reboot"
+			shutdown /sbin/shutdown -r now
 		else
 			read -p "Configuration change will be worked after next reboot; press key to continuous" REBOOT_ANS
 		fi
