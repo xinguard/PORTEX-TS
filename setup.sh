@@ -20,7 +20,7 @@ function REBOOT_CHECK() {
 }
 
 # Check virtual account "portex" status
-id portex >/dev/null 2>&1 || (echo "Create virtual account 'portex'"; useradd --home /home/portex --shell /usr/local/bin/taclogin -G dialout -m -U portex)
+id portex >/dev/null 2>&1 && (echo "Virtual account 'portexp' has already created") || (echo "Create virtual account 'portex'"; useradd --home /home/portex --shell /usr/local/bin/taclogin -G dialout -m -U portex)
 
 # Install programs to /usr/local/bin
 for file in $(ls bin); do
@@ -45,7 +45,6 @@ passwd -d portex >/dev/null 2>&1
 service ssh reload
 
 # Check service daemon installation
-#service led-daemon status >/dev/null 2>&1 || (echo "Install led-daemon service"; update-rc.d led-daemon defaults)
 service led-daemon status >/dev/null 2>&1
 if [ $? -eq 0 ]; then
     echo "Service led-daemon has already installed."
@@ -54,7 +53,6 @@ else
     update-rc.d led-daemon defaults
     REBOOT_FLAG=1
 fi
-#service pwr-and-control-button-monitor status >/dev/null 2>&1 || (echo "Install pwr-and-control-button-monitor service"; update-rc.d pwr-and-control-button-monitor defaults)
 service pwr-and-control-button-monitor status >/dev/null 2>&1
 if [ $? -eq 0 ]; then
     echo "Service pwr-and-control-button-monitor has already installed."
@@ -66,10 +64,6 @@ fi
 
 # Check booting script installation
 grep 'portex_ts.init' /etc/rc.local >/dev/null 2>&1 || (echo "Install booting script"; sed -i '19a/usr/local/bin/portex_ts.init\n' /etc/rc.local)
-
-# Check cron job installation
-crontab -l 2>/dev/null | grep usbcheck >/dev/null || (echo "Install cron job usbcheck"; /bin/bash -c "(crontab -l 2>/dev/null; echo '* * * * * /usr/local/bin/usbcheck') | crontab -")
-crontab -l 2>/dev/null | grep regreport >/dev/null || (echo "Install cron job regreport" && /bin/bash -c "(crontab -l 2>/dev/null; echo '* * * * * /usr/local/bin/regreport') | crontab -")
 
 # Check if reboot is required
 REBOOT_CHECK

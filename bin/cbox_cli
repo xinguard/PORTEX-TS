@@ -10,18 +10,48 @@ function HOSTNAME_SET() {
 	NEWNAME_FLAG=1
 	NEW_HOSTNAME1=''
 	NEW_HOSTNAME2=''
+	MIN_LENGTH=4
+	MAX_LENGTH=15
 	OLD_HOSTNAME=$(cat /etc/hostname)
 	echo "Original hostname: $OLD_HOSTNAME;"
-	while [ ! $NEW_HOSTNAME1 ]; do
-        	read -p "Enter new hostname: " NEW_HOSTNAME1
-    	done
-	while [ ! $NEW_HOSTNAME2 ]; do
-        	read -p "Enter new hostname again: " NEW_HOSTNAME2
-    	done
+	VALID_HOSTNAME=''
+	until [[ $VALID_HOSTNAME == '1' ]]; do
+	    NEW_HOSTNAME1=''
+	    while [ ! $NEW_HOSTNAME1 ]; do
+            read -p "Enter new hostname: " NEW_HOSTNAME1
+			[ $NEW_HOSTNAME1 == 'QUIT' ] && (echo "Hostname is not changed.") && return 1
+			CHAR_COUNT=$(echo ${#NEW_HOSTNAME1})
+	    	echo $NEW_HOSTNAME1 | grep -q -E '^[a-zA-Z0-9][-a-zA-Z0-9_]+$' && [ $CHAR_COUNT -ge $MIN_LENGTH ] && [ $CHAR_COUNT -le $MAX_LENGTH ]
+			if [ $? -eq 0 ]; then
+			    VALID_HOSTNAME='1'
+			else
+			    echo "A hostname should contain only letter, number and '-' between $MIN_LENGTH to $MAX_LENGTH characters length."
+			    echo "Not valid hostname, try again....."
+				echo ""
+			fi
+        done
+	done
+	VALID_HOSTNAME=''
+	until [[ $VALID_HOSTNAME == '1' ]]; do
+	    NEW_HOSTNAME2=''
+	    while [ ! $NEW_HOSTNAME2 ]; do
+            read -p "Enter new hostname again: " NEW_HOSTNAME2
+			[ $NEW_HOSTNAME2 == 'QUIT' ] && (echo "Hostname is not changed.") && return 1
+			CHAR_COUNT=$(echo ${#NEW_HOSTNAME2})
+	    	echo $NEW_HOSTNAME2 | grep -q -E '^[a-zA-Z0-9][-a-zA-Z0-9_]+$' && [ $CHAR_COUNT -ge $MIN_LENGTH ] && [ $CHAR_COUNT -le $MAX_LENGTH ]
+			if [ $? -eq 0 ]; then
+			    VALID_HOSTNAME='1'
+			else
+			    echo "A hostname should contain only letter, number and '-' between $MIN_LENGTH to $MAX_LENGTH characters length."
+			    echo "Not valid hostname, try again....."
+				echo ""
+			fi
+        done
+	done
 	[ "$NEW_HOSTNAME1" != "$NEW_HOSTNAME2" ] && echo "Entered hostnames are not the same." && NEWNAME_FLAG=0
 	[ "$OLD_HOSTNAME" = "$NEW_HOSTNAME2" ] && echo "New hostname is the same with the original one." && NEWNAME_FLAG=0
 	if [ $NEWNAME_FLAG = 0 ]; then
-		echo "Hostname is not changed, try again."
+		echo "Hostname is not changed."
 	else
 		sed -i "s/$OLD_HOSTNAME/$NEW_HOSTNAME2/g" /etc/hosts
 		sed -i "s/$OLD_HOSTNAME/$NEW_HOSTNAME2/g" /etc/hostname

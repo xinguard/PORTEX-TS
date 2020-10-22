@@ -6,14 +6,20 @@ source /usr/local/bin/writelog
 source /usr/local/bin/configmgmt
 PORTEX_TS_CONF="/home/portex/portex_ts.conf"
 
-trap "CONFIG_READ $PORTEX_TS_CONF RCHK_" SIGHUP
+function READ_PERIOD() {
+    CONFIG_READ $PORTEX_TS_CONF RCHK_TACSVR
+	PERIOD=${PORTEX_CONF[RCHK_TACSVR]}
+	echo "PERIOD is $PERIOD from config file."
+}
 
-CONFIG_READ $PORTEX_TS_CONF RCHK_
+trap "echo 'SIGHUP is received'; READ_PERIOD" SIGHUP
+
+READ_PERIOD
 
 if [ -z "$1" ]; then
-	declare PERIOD=${PORTEX_CONF[RCHK_TACSVR]}
+	PERIOD=$PERIOD
 else
-	declare PERIOD=${PORTEX_CONF[RCHK_TACSVR]}
+	PERIOD=$PERIOD
 	[ $(echo $1 | egrep '^[0-9]+$') ] && PERIOD=$1 # Check if $1 is an interger
 fi
 

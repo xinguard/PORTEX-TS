@@ -4,48 +4,75 @@
 source /usr/local/bin/writelog
 source /usr/local/bin/configmgmt
 PORTEX_TS_CONF="/home/portex/portex_ts.conf"
-
-VERBOSE_FLAG=OFF
 declare -A PORTEX_CONF
+
+function READ_PERIOD() {
+    CONFIG_READ $PORTEX_TS_CONF RCHK_REPORT
+	PERIOD=${PORTEX_CONF[RCHK_REPORT]}
+	echo "PERIOD is $PERIOD from config file."
+}
+
+trap "echo 'SIGHUP is received'; READ_PERIOD" SIGHUP
+
+READ_PERIOD
+
+if [ -z "$1" ]; then
+	PERIOD=$PERIOD
+else
+	PERIOD=$PERIOD
+	[ $(echo $1 | egrep '^[0-9]+$') ] && PERIOD=$1 # Check if $1 is an interger
+fi
+
+VERBOSE_FLAG=ON
+#declare -A PORTEX_CONF
 CONFIG_READ $PORTEX_TS_CONF TAC_
 CONFIG_READ $PORTEX_TS_CONF LOG_
 CONFIG_READ $PORTEX_TS_CONF NTP_
 echo ${PORTEX_CONF[LOG_ENABLE]}
 
-/bin/nc -vz -w 3 ${PORTEX_CONF[TAC_SERVER1_IP]} 49 &>/dev/null 2>&1
-if [ $? -eq 0 ]; then
-	TAC_SERVER1_STATUS="OK"
-	[ $VERBOSE_FLAG == "ON" ] && echo "Connect TACACS+ Server1(${PORTEX_CONF[TAC_SERVER1_IP]}) is available."
-else
-	TAC_SERVER1_STATUS="FAILED"
-	[ $VERBOSE_FLAG == "ON" ] && echo "Connect TACACS+ Server1(${PORTEX_CONF[TAC_SERVER1_IP]}) is unavailable."
-fi
-
-/bin/nc -vz -w 3 ${PORTEX_CONF[TAC_SERVER2_IP]} 49 &>/dev/null 2>&1
-if [ $? -eq 0 ]; then
-	TAC_SERVER2_STATUS="OK"
-	[ $VERBOSE_FLAG == "ON" ] && echo "Connect TACACS+ Server2(${PORTEX_CONF[TAC_SERVER2_IP]}) is available."
-else
-	TAC_SERVER2_STATUS="FAILED"
-	[ $VERBOSE_FLAG == "ON" ] && echo "Connect TACACS+ Server2(${PORTEX_CONF[TAC_SERVER2_IP]}) is unavailable."
-fi
-
-/usr/sbin/ntpdate ${PORTEX_CONF[NTP_SERVER1]} &>/dev/null 2>&1
-if [ $? -eq 0 ]; then
-	NTP_STATUS="ntp sync"
-else
-	echo NTP_SERVER1_STATUS="FAILED"
-	/usr/sbin/ntpdate ${PORTEX_CONF[NTP_SERVER2]} &>/dev/null 2>&1
-	if [ $? -eq 0 ]; then
-		NTP_STATUS="ntp sync"
-	else
-		NTP_STATUS="ntp unsync"
-	fi
-fi
-
-SYSTEM_BOOTTIME=$(uptime -s)
-SYSTEM_UPTIME=$(uptime -p)
-
-[ ${PORTEX_CONF[LOG_ENABLE]} == "ON" ] && write_log_buffer auth info TACACS \
-	"TAC_SERVER1(${PORTEX_CONF[TAC_SERVER1_IP]})=$TAC_SERVER1_STATUS, TAC_SERVER2(${PORTEX_CONF[TAC_SERVER2_IP]})=$TAC_SERVER2_STATUS; \
-	System $SYSTEM_UPTIME since $SYSTEM_BOOTTIME ($NTP_STATUS)"
+ while [ TRUE ]; do
+    echo "Repeat cycle is $PERIOD seconds."
+    /bin/nc -vz -w 3 ${PORTEX_CONF[TAC_SERVER1_IP]} 49 &>/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+    	TAC_SERVER1_STATUS="OK"
+    	[ $VERBOSE_FLAG == "ON" ] && echo "Connect TACACS+ Server1(${PORTEX_CONF[TAC_SERVER1_IP]}) is available."
+    else
+    	TAC_SERVER1_STATUS="FAILED"
+    	[ $VERBOSE_FLAG == "ON" ] && echo "Connect TACACS+ Server1(${PORTEX_CONF[TAC_SERVER1_IP]}) is unavailable."
+    fi
+    
+    /bin/nc -vz -w 3 ${PORTEX_CONF[TAC_SERVER2_IP]} 49 &>/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+    	TAC_SERVER2_STATUS="OK"
+    	[ $VERBOSE_FLAG == "ON" ] && echo "Connect TACACS+ Server2(${PORTEX_CONF[TAC_SERVER2_IP]}) is available."
+    else
+    	TAC_SERVER2_STATUS="FAILED"
+    	[ $VERBOSE_FLAG == "ON" ] && echo "Connect TACACS+ Server2(${PORTEX_CONF[TAC_SERVER2_IP]}) is unavailable."
+    fi
+    
+    /usr/sbin/ntpdate ${PORTEX_CONF[NTP_SERVER1]} &>/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+	    echo "Connect NTP Server1(${PORTEX_CONF[NTP_SERVER1]}) is available."
+    	NTP_STATUS="ntp sync"
+    else
+    	echo NTP_SERVER1_STATUS="FAILED"
+    	/usr/sbin/ntpdate ${PORTEX_CONF[NTP_SERVER2]} &>/dev/null 2>&1
+    	if [ $? -eq 0 ]; then
+		    "Connect NTP Server1(${PORTEX_CONF[NTP_SERVER2]}) is available."
+    		NTP_STATUS="ntp sync"
+    	else
+		    "Connect ALL NTP Servers(${PORTEX_CONF[NTP_SERVER1]} & ${PORTEX_CONF[NTP_SERVER2]}) is available."
+    		NTP_STATUS="ntp unsync"
+    	fi
+    fi
+    
+    SYSTEM_BOOTTIME=$(uptime -s)
+    SYSTEM_UPTIME=$(uptime -p)
+    
+    [ ${PORTEX_CONF[LOG_ENABLE]} == "ON" ] && write_log_buffer auth info TACACS \
+    	"TAC_SERVER1(${PORTEX_CONF[TAC_SERVER1_IP]})=$TAC_SERVER1_STATUS, TAC_SERVER2(${PORTEX_CONF[TAC_SERVER2_IP]})=$TAC_SERVER2_STATUS; \
+    	System $SYSTEM_UPTIME since $SYSTEM_BOOTTIME ($NTP_STATUS)"
+    
+	echo ""
+	sleep $PERIOD
+done

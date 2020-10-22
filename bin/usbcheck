@@ -3,30 +3,52 @@
 #
 #
 source /usr/local/bin/writelog
+source /usr/local/bin/configmgmt
+PORTEX_TS_CONF="/home/portex/portex_ts.conf"
 LSUSB="/usr/bin/lsusb"
 
-# Check existing USB log
-USBLOG=$(ls -l /dev/shm | egrep lsusb | awk '{print $9}' | awk -F. '{print $1}' | uniq)
+function READ_PERIOD() {
+    CONFIG_READ $PORTEX_TS_CONF RCHK_USBLNK
+	PERIOD=${PORTEX_CONF[RCHK_USBLNK]}
+	echo "PERIOD is $PERIOD from config file."
+}
 
-if [[ -n $USBLOG ]]; then
-	USBLOG_OLD=$(ls -l /dev/shm/lsusb.* | awk '{print $9}')
-	echo "There is an existing USB log information"
-	echo "Start to compare OLD/NEW USB log informatoin"
-	$LSUSB >/dev/shm/lsusb.$$
-	USBLOG_NEW="/dev/shm/lsusb.$$"
-	COMRESULT=$(sdiff -s $USBLOG_OLD $USBLOG_NEW)
+trap "echo 'SIGHUP is received'; READ_PERIOD" SIGHUP
 
-	if [[ -n "$COMRESULT" ]]; then
-		echo "USB configuration changed, generate log!"
-		write_log_buffer local0 notice USB "USB configuration changed"
-	else
-		echo "No USB configuration changed"
-	fi
+READ_PERIOD
 
-	rm $USBLOG_OLD
-
+if [ -z "$1" ]; then
+	PERIOD=$PERIOD
 else
-	echo "No existing USB log information"
-	echo "Create a USB log"
-	$LSUSB >/dev/shm/lsusb.$$
+	PERIOD=$PERIOD
+	[ $(echo $1 | egrep '^[0-9]+$') ] && PERIOD=$1 # Check if $1 is an interger
 fi
+
+while [ TRUE ]; do
+    # Check existing USB log
+    USBLOG=$(ls -l /dev/shm | egrep lsusb | awk '{print $9}' | awk -F. '{print $1}' | uniq)
+	TIME_STAMP=$(date '+%d%H%M%S')
+	echo "STAMP is $TIME_STAMP"
+    if [[ -n $USBLOG ]]; then
+    	USBLOG_OLD=$(ls -l /dev/shm/lsusb.* | awk '{print $9}')
+	    echo "There is an existing USB log information"
+	    echo "Start to compare OLD/NEW USB log informatoin"
+	    $LSUSB >/dev/shm/lsusb.$$.$TIME_STAMP
+	    USBLOG_NEW="/dev/shm/lsusb.$$.$TIME_STAMP"
+	    COMRESULT=$(sdiff -s $USBLOG_OLD $USBLOG_NEW)
+	    if [[ -n "$COMRESULT" ]]; then
+		    echo "USB configuration changed, generate log!"
+			echo ""
+		    write_log_buffer local0 notice USB "USB configuration changed"
+	    else
+		    echo "No USB configuration changed"
+			echo ""
+	    fi
+	    rm $USBLOG_OLD
+    else
+	    echo "No existing USB log information"
+	    echo "Create a USB log"
+	    $LSUSB >/dev/shm/lsusb.$$.$TIME_STAMP
+    fi
+	sleep $PERIOD
+done
