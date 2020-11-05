@@ -26,7 +26,7 @@ sudo pip install tacacs_plus RPi.GPIO
 ### PORTEX-TS program installation
 
 cd /tmp  
-git clone https://github.com/xinguard/PORTEX-TS.git  
+git clone <https://github.com/xinguard/PORTEX-TS.git>
 cd PORTEX-TS  
 sudo /bin/bash setup.sh  
 
