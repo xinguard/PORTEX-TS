@@ -11,7 +11,7 @@ function HOSTNAME_SET() {
 	NEW_HOSTNAME1=''
 	NEW_HOSTNAME2=''
 	MIN_LENGTH=4
-	MAX_LENGTH=15
+	MAX_LENGTH=20
 	OLD_HOSTNAME=$(cat /etc/hostname)
 	echo "Original hostname: $OLD_HOSTNAME;"
 	VALID_HOSTNAME=''
