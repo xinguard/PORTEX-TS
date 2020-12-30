@@ -31,6 +31,9 @@ CONFIG_READ $PORTEX_TS_CONF NTP_
 echo ${PORTEX_CONF[LOG_ENABLE]}
 
  while [ TRUE ]; do
+    CONFIG_READ $PORTEX_TS_CONF TAC_
+    CONFIG_READ $PORTEX_TS_CONF LOG_
+    CONFIG_READ $PORTEX_TS_CONF NTP_
     echo "Repeat cycle is $PERIOD seconds."
     /bin/nc -vz -w 3 ${PORTEX_CONF[TAC_SERVER1_IP]} 49 &>/dev/null 2>&1
     if [ $? -eq 0 ]; then
